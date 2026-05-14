@@ -1,7 +1,7 @@
 
 ```bash
 # 1. clone repo
-git clone git@github.com:TVOJ-USERNAME/webte2-cas.git
+git clone https://github.com/hoffmennn/webte2-cas-system.git
 cd webte2-cas
  
 # 2. copy env
