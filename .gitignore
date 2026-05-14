@@ -1,0 +1,14 @@
+# Docker
+dbdata/
+
+# Env (root level)
+.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
