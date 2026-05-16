@@ -11,7 +11,7 @@ class OctaveSession extends Model
 
     protected $casts = ['last_used_at' => 'datetime'];
 
-    public static function touch(string $token): void
+    public static function touchSession(string $token): void
     {
         static::updateOrCreate(
             ['session_token' => $token],
