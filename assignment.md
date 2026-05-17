@@ -1,4 +1,25 @@
-Hlavnou úlohou projektu bude spojazdniť cez REST API niektorý z voľne dostupných CAS
+# WEBTE2 — Záverečné zadanie · LS 2025/2026
+
+## 1. Všeobecné pokyny
+
+- Projekty sa budú robiť v **dvojčlenných tímoch**, pričom je potrebné, aby ste si úlohy rozdelili rovnomerne.
+- Zadanie je potrebné odovzdať do prostredia **MS Teams** najneskôr do **21. 5. 2026 (23:55)** jedným členom tímu.
+  Neskoršie odovzdanie projektu bude penalizované **2 bodmi za každý deň omeškania** na každého člena tímu
+  (t.j. 4 body/deň pri dvojčlennom tíme).
+- Pre účely ukončenia predmetu je potrebné mať celý projekt umiestnený **na školskom serveri**.
+- Pri odovzdávaní do MS Teams nahrajte **ZIP archív s vypracovaným zadaním** a **adresu stránky** na školskom serveri.
+- Stránka musí byť optimalizovaná pre **Chrome a Firefox**.
+- **Odporúčanie:** pracujte s Internetom, inšpirujte sa rôznymi stránkami. Ak však prídeme na
+  **plagiátorstvo** v rozsahu viac ako 10 riadkov kódu (cca 200 znakov), tak to automaticky
+  znamená **0 bodov** zo záverečného zadania, čo má za následok známku **FX** z predmetu.
+- Ak pri prípadnej obhajobe člen tímu nebude vedieť zodpovedať na otázku, ako naprogramoval danú časť, považuje sa to za **nesplnené**.
+- Pekne vypracované projekty, resp. ich časti, môžu byť zverejnené verejnosti.
+
+---
+
+## 2. Zadanie
+
+Hlavnou úlohou projektu bude spojazdniť cez **REST API** niektorý z voľne dostupných CAS
 (Computer Aided System), ktorý si je potrebné nainštalovať na niektorý zo serverov členov
 tímu. Odporúčaný je voľne dostupný softvér **Octave**, ale v prípade záujmu to môže byť aj iná
 alternatíva (Maxima, Python riešenia, atď.).
@@ -15,17 +36,15 @@ Nezabudnite na to, že sa hodnotí aj grafický dizajn vytvorenej aplikácie, vh
 aplikácie. Na vypracovanie projektu je možné použiť aj PHP framework (backend) alebo JS
 framework (frontend).
 
----
-
-## Požiadavky na projekt
+### Požiadavky na projekt
 
 1. Pri práci na projekte je nevyhnutné používať **verzionovací systém**, napr. github, gitlab,
    bitbucket. Vo VCS systéme musí byť vidieť prácu každého člena tímu.
 
 2. Vytvorená webstránka bude navrhnutá ako **dvojjazyčná** (slovenčina, angličtina).
 
-    > Pozn.: ak sa prepínate medzi jazykmi, musíte zostať na tej istej podstránke, ako ste boli
-    > pred prepnutím, a nie vrátiť sa na domovskú stránku aplikácie.
+   > Pozn.: ak sa prepínate medzi jazykmi, musíte zostať na tej istej podstránke, ako ste boli
+   > pred prepnutím, a nie vrátiť sa na domovskú stránku aplikácie.
 
 3. Celá stránka bude **responzívna** vrátane použitej grafiky.
 
@@ -33,33 +52,33 @@ framework (frontend).
    dokázali realizovať základné aritmetické operácie a spustiť príkazy pre získanie numerických
    hodnôt potrebných na animáciu objektu a vykresľovanie grafu. V prípade, že výpočet
    hodnôt bude pre tieto činnosti príliš rýchly, spomaľte ho na strane servera. Prípadný
-   koeficient spomalenia definujte v konfiguračnom súbore.
+   **koeficient spomalenia** definujte v konfiguračnom súbore.
 
 5. Jednotlivé numerické výstupy z CAS budú používateľovi poskytované na základe **autentifikačného
    tokenu alebo API kľúča**, ktorý bude definovaný v konfiguračnom súbore. Bez platného
    tokenu/API kľúča nebude prístup k službe umožnený.
 
 6. Požiadavky na výpočet budú do CAS zasielané dvoma spôsobmi: z animácie a z **formulára**
-   na web stránke (1× textarea na zadanie príkazu umožňujúca zvýraznenie syntaxe (_syntax
-   highlighting_), 1× tlačidlo na odoslanie požiadavky, 1× output na výpis výstupu). V
-   prípade, že si pri výpočte vytvorím pomocnú premennú, je potrebné ju uchovať, aby s
-   ňou bolo možné pracovať pri ďalších výpočtoch. T.j. bude sa dať realizovať nasledovný
-   výpočet:
+   na web stránke (1× textarea na zadanie príkazu umožňujúca zvýraznenie syntaxe (*syntax
+   highlighting*), 1× tlačidlo na odoslanie požiadavky, 1× output na výpis výstupu). V
+   prípade, že si pri výpočte vytvorím pomocnú premennú, je potrebné ju **uchovať**, aby s
+   ňou bolo možné pracovať pri ďalších výpočtoch. T.j. bude sa dať realizovať nasledovný výpočet:
 
-    ```octave
-    a = 1 + 1
-    a + 2
-    ```
+   ```octave
+   a = 1 + 1
+   a + 2
+   ```
 
 7. Súčasťou projektu bude vytvoriť **dve animácie dynamického systému** a k nim priebežne
    generovaný graf sledovaných výstupov na základe užívateľom definovaných parametrov:
-    - **inverzné kyvadlo** —
-      <http://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=SystemModeling>
-    - **gulička na tyči** —
-      <http://ctms.engin.umich.edu/CTMS/index.php?example=BallBeam&section=SystemModeling>
 
-    Animácia (2D alebo 3D) a vykresľovanie grafu musí byť synchronizované.
-    Návod na realizáciu výpočtov k animáciám nájdete v priloženom pdf súbore.
+   - **inverzné kyvadlo** —
+     <http://ctms.engin.umich.edu/CTMS/index.php?example=InvertedPendulum&section=SystemModeling>
+   - **gulička na tyči** —
+     <http://ctms.engin.umich.edu/CTMS/index.php?example=BallBeam&section=SystemModeling>
+
+   Animácia (2D alebo 3D) a vykresľovanie grafu musí byť **synchronizované**.
+   Návod na realizáciu výpočtov k animáciám nájdete v priloženom pdf súbore.
 
 8. Všetky požiadavky zasielané do CAS je potrebné **logovať** (dátum a čas, odoslané príkazy,
    info o korektnosti/chybe).
@@ -92,19 +111,18 @@ framework (frontend).
 
 Odovzdanie projektu sa robí cez **MS Teams** a je tam potrebné vložiť:
 
-- **technickú dokumentáciu** (rovnaké požiadavky ako pri iných zadaniach), nezabudnite v
-  nej uviesť:
-    - Všetky zmeny konfigurácie servera, dodatočne inštalované programy, balíky, knižnice
-      s ich prípadnou konfiguráciou. V prípade, že sa inštalácia nebude dať zreplikovať
-      podľa priloženej dokumentácie, je považovaná za nefunkčnú.
-    - rozdelenie úloh medzi jednotlivých členov tímu,
-      v prípade neurobenia niektorej z úloh, to treba jasne vyznačiť.
+- **technickú dokumentáciu** (rovnaké požiadavky ako pri iných zadaniach), nezabudnite v nej uviesť:
+  - Všetky **zmeny konfigurácie servera**, dodatočne inštalované programy, balíky, knižnice
+    s ich prípadnou konfiguráciou. V prípade, že sa inštalácia nebude dať zreplikovať
+    podľa priloženej dokumentácie, je považovaná za nefunkčnú.
+  - **rozdelenie úloh** medzi jednotlivých členov tímu,
+  - **v prípade neurobenia niektorej z úloh, to treba jasne vyznačiť**.
 - **samotnú aplikáciu** ako:
-    - spakované súbory vrátane konfiguračného súboru, v ktorom je potrebné definovať
-      všetky nastavenia,
-    - sql súbor pre naplnenie databázy,
-    - Dockerfile a/alebo Docker Compose súbor.
-- **vytvorené video**
+  - spakované súbory vrátane **konfiguračného súboru**, v ktorom je potrebné definovať
+    všetky nastavenia,
+  - **sql súbor** pre naplnenie databázy,
+  - **Dockerfile** a/alebo **Docker Compose** súbor.
+- **vytvorené video**.
 
 Okrem toho pri odovzdávaní je potrebné uviesť:
 
@@ -114,21 +132,24 @@ Okrem toho pri odovzdávaní je potrebné uviesť:
 Zazipované súbory samotnej aplikácie (bez videa) odovzdajte aj na
 <https://node11.webte.fei.stuba.sk> do časti **záverečné zadanie**.
 
-> dvojjazyčnosť
-
 ---
 
 ## 4. Návrh hodnotenia
 
-### Úlohy
+| Úlohy | Body |
+| --- | ---: |
+| dvojjazyčnosť | 2 |
+| backend aplikácie, API vrátane tokenu/API kľúča | 12 |
+| funkčný a responzívny frontend (animácie vrátane koeficientu spomalenia, grafy, interakcia s CAS) | 12 |
+| log-y, export do csv | 5 |
+| dynamicky generované pdf s návodom | 5 |
+| štatistika | 5 |
+| docker balíček | 7 |
+| používanie verzionovacieho systému všetkými členmi tímu <sup>1</sup> | 2 |
+| finalizácia aplikácie <sup>2</sup> | 5 |
+| video | 5 |
+| **Spolu** | **60** |
 
-- backend aplikácie, API vrátane tokenu/API kľúča
-- funkčný a responzívny frontend
-  (animácie vrátane koeficientu spomalenia, grafy, interakcia s CAS)
-- log-y, export do CSV
-- dynamicky generované PDF s návodom
-- štatistika
-- docker balíček
-- používanie verzionovacieho systému všetkými členmi tímu — **1**
-- finalizácia aplikácie — **2**
-- video
+<sup>1</sup> každý člen musí mať minimálne **3 zmysluplné commit-y**
+
+<sup>2</sup> grafický layout, responzívnosť, štruktúra, orientácia v aplikácii, voľba DB tabuliek, úplnosť odovzdania projektu, …
