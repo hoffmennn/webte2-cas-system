@@ -5,6 +5,9 @@ use App\Http\Controllers\Api\ExecuteController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('api.key')->group(function () {
+    // Lightweight liveness check used by the frontend to verify the API key.
+    Route::get('/ping', fn () => response()->json(['ok' => true]));
+
     // General-purpose Octave command execution (session-aware)
     Route::post('/execute', ExecuteController::class);
 

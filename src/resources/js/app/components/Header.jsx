@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-export function Header({ lang, setLang, apiKey, onSaveApiKey, t }) {
+export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
     const [draft, setDraft] = useState(apiKey);
 
     const save = () => onSaveApiKey(draft);
@@ -13,7 +13,7 @@ export function Header({ lang, setLang, apiKey, onSaveApiKey, t }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <LangToggle lang={lang} setLang={setLang} />
                 <ApiKeyInput draft={draft} setDraft={setDraft} onSave={save} placeholder={t.apiKey} saveLabel={t.save} />
-                {apiKey && <ReadyBadge label={t.readyLabel} />}
+                <KeyStatusBadge status={keyStatus} t={t} />
             </div>
         </header>
     );
@@ -47,10 +47,25 @@ function ApiKeyInput({ draft, setDraft, onSave, placeholder, saveLabel }) {
     );
 }
 
-function ReadyBadge({ label }) {
+const BADGE_STYLES = {
+    valid:    { color: '#16a34a', dot: '#16a34a' }, // green
+    checking: { color: '#ca8a04', dot: '#eab308' }, // amber, pulsing
+    invalid:  { color: '#dc2626', dot: '#dc2626' }, // red
+};
+
+function KeyStatusBadge({ status, t }) {
+    if (status === 'idle') return null;
+    const { color, dot } = BADGE_STYLES[status];
+    const label = status === 'valid'    ? t.readyLabel
+                : status === 'checking' ? t.checkingLabel
+                : t.invalidKeyLabel;
+
     return (
-        <span style={{ fontSize: 12, color: '#16a34a', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ width: 7, height: 7, background: '#16a34a', borderRadius: '50%', display: 'inline-block' }} />
+        <span style={{ fontSize: 12, color, display: 'flex', alignItems: 'center', gap: 4 }}>
+            <span style={{
+                width: 7, height: 7, background: dot, borderRadius: '50%', display: 'inline-block',
+                animation: status === 'checking' ? 'cas-pulse 1s ease-in-out infinite' : 'none',
+            }} />
             {label}
         </span>
     );

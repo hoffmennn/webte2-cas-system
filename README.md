@@ -41,6 +41,19 @@ cd ..
 
 App is now at http://localhost:8080.
 
+## API keys
+
+Every `/api/*` route requires a valid key in `X-API-Key` (or `Authorization: Bearer …`).
+
+- **The default key lives in `src/.env`** as `CAS_API_KEY=...`. Set this once; the frontend's API-key field accepts the same value.
+- **Additional keys** (e.g. one per team member or for demos) can be issued without touching `.env`:
+
+  ```bash
+  docker compose exec app php artisan cas:issue-key juraj-laptop
+  ```
+
+  The command generates a random 48-character key, stores it in the `api_keys` table with `active=true`, and prints it. Use the printed value as the API key. Revoke with `update active=false` on the row.
+
 ## During development
 
 Run the Vite dev server instead of building, so frontend changes hot-reload:
