@@ -38,7 +38,9 @@ class AnimationController extends Controller
         $result = $this->octave->computeInvertedPendulum($params);
 
         $this->logRequest($request, 'animate/inverted-pendulum', $params, $result);
-        $this->recordStat($request, 'inverted_pendulum', $visitorToken);
+        if ($result['success']) {
+            $this->recordStat($request, 'inverted_pendulum', $visitorToken);
+        }
 
         return $this->buildAnimationResponse($result, ['t', 'x', 'x_dot', 'theta', 'theta_dot'], $visitorToken);
     }
@@ -64,7 +66,9 @@ class AnimationController extends Controller
         $result = $this->octave->computeBallBeam($params);
 
         $this->logRequest($request, 'animate/ball-beam', $params, $result);
-        $this->recordStat($request, 'ball_beam', $visitorToken);
+        if ($result['success']) {
+            $this->recordStat($request, 'ball_beam', $visitorToken);
+        }
 
         return $this->buildAnimationResponse($result, ['t', 'r', 'r_dot', 'alpha', 'alpha_dot'], $visitorToken);
     }
