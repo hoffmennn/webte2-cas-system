@@ -33,6 +33,22 @@ export const TRANSLATIONS = {
             empty_hint: 'Set parameters and press Run',
             need_api_key: 'Set API key first',
         },
+        tabs: {
+            stats: 'Stats',
+        },
+        stats: {
+            col_animation: 'Animation',
+            col_runs: 'Runs',
+            col_visitors: 'Unique visitors',
+            col_last_used: 'Last used',
+            col_time: 'Time',
+            col_city: 'City',
+            col_country: 'Country',
+            section_summary: 'Summary',
+            section_details: 'Recent uses',
+            clear_filter: 'Clear filter',
+            empty: 'No animation usage recorded yet.',
+        },
     },
     sk: {
         title: 'CAS Rozhranie',
@@ -67,6 +83,22 @@ export const TRANSLATIONS = {
         sim: {
             empty_hint: 'Nastavte parametre a stlačte Spustiť',
             need_api_key: 'Najskôr nastavte API kľúč',
+        },
+        tabs: {
+            stats: 'Štatistika',
+        },
+        stats: {
+            col_animation: 'Animácia',
+            col_runs: 'Počet',
+            col_visitors: 'Unikátni používatelia',
+            col_last_used: 'Naposledy',
+            col_time: 'Čas',
+            col_city: 'Mesto',
+            col_country: 'Krajina',
+            section_summary: 'Súhrn',
+            section_details: 'Posledné použitia',
+            clear_filter: 'Zrušiť filter',
+            empty: 'Zatiaľ nezaznamenané žiadne použitie animácií.',
         },
     },
 };
