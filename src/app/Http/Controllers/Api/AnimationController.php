@@ -12,6 +12,9 @@ use Illuminate\Support\Str;
 
 class AnimationController extends Controller
 {
+    private const VISITOR_COOKIE = 'cas_visitor';
+    private const VISITOR_COOKIE_LIFETIME_MINUTES = 525600; // 1 year
+
     public function __construct(private OctaveService $octave) {}
 
     /**
@@ -31,12 +34,13 @@ class AnimationController extends Controller
             'tmax'   => 'nullable|numeric|min:1|max:20',
         ]);
 
+        $visitorToken = $this->resolveVisitorToken($request);
         $result = $this->octave->computeInvertedPendulum($params);
 
         $this->logRequest($request, 'animate/inverted-pendulum', $params, $result);
-        $this->recordStat($request, 'inverted_pendulum');
+        $this->recordStat($request, 'inverted_pendulum', $visitorToken);
 
-        return $this->buildAnimationResponse($result, ['t', 'x', 'x_dot', 'theta', 'theta_dot']);
+        return $this->buildAnimationResponse($result, ['t', 'x', 'x_dot', 'theta', 'theta_dot'], $visitorToken);
     }
 
     /**
@@ -56,39 +60,63 @@ class AnimationController extends Controller
             'tmax' => 'nullable|numeric|min:1|max:20',
         ]);
 
+        $visitorToken = $this->resolveVisitorToken($request);
         $result = $this->octave->computeBallBeam($params);
 
         $this->logRequest($request, 'animate/ball-beam', $params, $result);
-        $this->recordStat($request, 'ball_beam');
+        $this->recordStat($request, 'ball_beam', $visitorToken);
 
-        return $this->buildAnimationResponse($result, ['t', 'r', 'r_dot', 'alpha', 'alpha_dot']);
+        return $this->buildAnimationResponse($result, ['t', 'r', 'r_dot', 'alpha', 'alpha_dot'], $visitorToken);
     }
 
     // -------------------------------------------------------------------------
 
-    private function buildAnimationResponse(array $result, array $columns): JsonResponse
+    private function buildAnimationResponse(array $result, array $columns, string $visitorToken): JsonResponse
     {
         if (! $result['success']) {
-            return response()->json([
+            return $this->withVisitorCookie(response()->json([
                 'error'   => 'Octave computation failed.',
                 'details' => $result['error'],
-            ], 500);
+            ], 500), $visitorToken);
         }
 
         $data = json_decode($result['output'], true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return response()->json([
+            return $this->withVisitorCookie(response()->json([
                 'error' => 'Could not parse Octave output.',
                 'raw'   => $result['output'],
-            ], 500);
+            ], 500), $visitorToken);
         }
 
-        return response()->json([
+        return $this->withVisitorCookie(response()->json([
             'data'    => $data,
             'columns' => $columns,
             'success' => true,
-        ]);
+        ]), $visitorToken);
+    }
+
+    /**
+     * Anonymous identifier kept in `cas_visitor` cookie to enforce the 10-minute
+     * stats cooldown (REQ 11). Reuses the cookie if already present, otherwise
+     * mints a fresh UUID; the cookie itself is written by `withVisitorCookie`.
+     */
+    private function resolveVisitorToken(Request $request): string
+    {
+        return $request->cookie(self::VISITOR_COOKIE) ?? Str::uuid()->toString();
+    }
+
+    private function withVisitorCookie(JsonResponse $response, string $token): JsonResponse
+    {
+        return $response->cookie(
+            self::VISITOR_COOKIE,
+            $token,
+            self::VISITOR_COOKIE_LIFETIME_MINUTES,
+            '/',
+            null,
+            false,
+            false
+        );
     }
 
     private function logRequest(Request $request, string $endpoint, array $params, array $result): void
@@ -106,16 +134,14 @@ class AnimationController extends Controller
         ]);
     }
 
-    private function recordStat(Request $request, string $type): void
+    private function recordStat(Request $request, string $type, string $visitorToken): void
     {
-        $token = $request->cookie('cas_visitor') ?? Str::uuid()->toString();
-
-        if (AnimationStat::canCount($token, $type)) {
+        if (AnimationStat::canCount($visitorToken, $type)) {
             $geo = $this->resolveGeo($request->ip());
 
             AnimationStat::create([
                 'animation_type' => $type,
-                'cookie_token'   => $token,
+                'cookie_token'   => $visitorToken,
                 'ip_address'     => $request->ip(),
                 'city'           => $geo['city'],
                 'country'        => $geo['country'],
