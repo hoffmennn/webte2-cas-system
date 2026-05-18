@@ -71,7 +71,7 @@ function LangToggle({ lang, setLang }) {
         <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: 6, overflow: 'hidden' }}>
             {['en', 'sk'].map(l => (
                 <button key={l} onClick={() => setLang(l)}
-                    style={{ padding: '4px 12px', border: 'none', cursor: 'pointer', background: lang === l ? '#0f172a' : '#fff', color: lang === l ? '#fff' : '#64748b', fontWeight: lang === l ? 600 : 400, fontSize: 12 }}>
+                    style={{ minWidth: 44, padding: '4px 12px', border: 'none', cursor: 'pointer', background: lang === l ? '#0f172a' : '#fff', color: lang === l ? '#fff' : '#64748b', fontWeight: lang === l ? 600 : 400, fontSize: 12, textAlign: 'center' }}>
                     {l.toUpperCase()}
                 </button>
             ))}
