@@ -161,6 +161,15 @@ OCTAVE;
         $keeping = false;
 
         foreach (preg_split('/\r?\n/', $stderr) as $line) {
+            // The "could not source the temp file" line is how Octave reports a
+            // syntax error in our setup. The line itself leaks the temp path,
+            // so we substitute a clean synthesized parse-error message.
+            if (self::isSourceFileError($line)) {
+                $kept[] = 'parse error: command could not be parsed';
+                $keeping = false;
+                continue;
+            }
+
             if (self::isNoiseLine($line)) {
                 $keeping = false;
                 continue;
@@ -181,6 +190,11 @@ OCTAVE;
         }
 
         return trim(implode("\n", $kept));
+    }
+
+    private static function isSourceFileError(string $line): bool
+    {
+        return preg_match('/^\s*error:\s+source:\s+error sourcing file/i', $line) === 1;
     }
 
     private static function isNoiseLine(string $line): bool
