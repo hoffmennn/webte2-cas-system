@@ -17,7 +17,6 @@ export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
                 {t.title}
             </h1>
             <div className="flex items-center gap-3 flex-wrap">
-                <LangToggle lang={lang} setLang={setLang} />
                 <ApiKeyInput
                     draft={draft}
                     setDraft={setDraft}
@@ -29,6 +28,7 @@ export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
                 />
                 <ExportLogsButton apiKey={apiKey} label={t.header.export_logs} />
                 <KeyStatusBadge status={keyStatus} t={t} />
+                <LangToggle lang={lang} setLang={setLang} />
             </div>
         </header>
     );
@@ -67,10 +67,13 @@ function ExportLogsButton({ apiKey, label }) {
 }
 
 function LangToggle({ lang, setLang }) {
+    // Click anywhere on the toggle flips to the other language — clicking the
+    // active button is not a no-op, it's the same as clicking the inactive one.
+    const flip = () => setLang(lang === 'en' ? 'sk' : 'en');
     return (
         <div className="flex border border-slate-200 rounded-md overflow-hidden">
             {['en', 'sk'].map(l => (
-                <button key={l} onClick={() => setLang(l)}
+                <button key={l} onClick={flip}
                     className={`min-w-[44px] py-1 px-3 border-0 cursor-pointer text-xs text-center ${lang === l ? 'bg-slate-900 text-white font-semibold' : 'bg-white text-slate-500 font-normal'}`}>
                     {l.toUpperCase()}
                 </button>

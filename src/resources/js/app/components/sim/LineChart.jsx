@@ -28,7 +28,7 @@ export function LineChart({ data, series, height = 180, idx }) {
     const xTicks = 5;
 
     return (
-        <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height }}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height }}>
             {Array.from({ length: yTicks + 1 }, (_, i) => {
                 const y = pad.t + (i / yTicks) * innerH;
                 const v = vMax - (i / yTicks) * vRange;
