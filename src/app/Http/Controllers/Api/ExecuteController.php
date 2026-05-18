@@ -44,9 +44,11 @@ class ExecuteController extends Controller
             'ip_address'    => $request->ip(),
         ]);
 
+        $cleanError = OctaveService::filterStderr($result['error'] ?? '');
+
         return response()->json([
             'output'        => $result['output'],
-            'error'         => $result['error'] ?: null,
+            'error'         => $cleanError ?: null,
             'success'       => $result['success'],
             'session_token' => $sessionToken,
         ], $result['success'] ? 200 : 422);

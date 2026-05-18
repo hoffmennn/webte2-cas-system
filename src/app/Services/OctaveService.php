@@ -148,6 +148,48 @@ OCTAVE;
         return $this->runScript($script);
     }
 
+    /**
+     * Filter raw Octave stderr down to lines that look like real Octave
+     * diagnostics: `error:`, `parse error`, `warning:` and their indented
+     * continuation lines. Drops PHP/proc_open noise, the per-run
+     * `execution_exception` shutdown chatter, and any line that leaks the
+     * internal `/tmp/cas_oct_*.m` temp-file path.
+     */
+    public static function filterStderr(string $stderr): string
+    {
+        $kept = [];
+        $keeping = false;
+
+        foreach (preg_split('/\r?\n/', $stderr) as $line) {
+            if (self::isNoiseLine($line)) {
+                $keeping = false;
+                continue;
+            }
+
+            if (preg_match('/^\s*(error:|parse error|warning:)/i', $line)) {
+                $kept[] = $line;
+                $keeping = true;
+                continue;
+            }
+
+            if ($keeping && $line !== '' && ctype_space($line[0])) {
+                $kept[] = $line;
+                continue;
+            }
+
+            $keeping = false;
+        }
+
+        return trim(implode("\n", $kept));
+    }
+
+    private static function isNoiseLine(string $line): bool
+    {
+        return str_contains($line, 'ignoring const execution_exception')
+            || str_contains($line, 'cas_oct_')
+            || preg_match('/^\s*error:\s*called from/i', $line) === 1;
+    }
+
     // -------------------------------------------------------------------------
 
     private function matFilePath(string $token): string

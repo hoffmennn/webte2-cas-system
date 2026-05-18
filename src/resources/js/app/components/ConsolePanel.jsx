@@ -23,7 +23,9 @@ export function ConsolePanel({ apiKey, t }) {
             }
             const resultLine = json.success
                 ? (json.output || '(no output)')
-                : t.consolePanel.error_prefix;
+                : json.error
+                    ? `${t.consolePanel.error_prefix} ${json.error}`
+                    : t.consolePanel.error_prefix;
             setOutput(prev => prev + `>> ${command}\n${resultLine}\n\n`);
         } catch {
             setOutput(prev => prev + `>> ${command}\n${t.consolePanel.error_prefix}\n\n`);
