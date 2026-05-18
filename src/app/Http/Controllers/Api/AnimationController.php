@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Api\Concerns\ResolvesApiKey;
 use App\Http\Controllers\Controller;
 use App\Models\AnimationStat;
 use App\Models\RequestLog;
@@ -12,6 +13,8 @@ use Illuminate\Support\Str;
 
 class AnimationController extends Controller
 {
+    use ResolvesApiKey;
+
     private const VISITOR_COOKIE = 'cas_visitor';
     private const VISITOR_COOKIE_LIFETIME_MINUTES = 525600; // 1 year
 
@@ -179,13 +182,4 @@ class AnimationController extends Controller
         return ['city' => null, 'country' => null];
     }
 
-    private function resolveApiKey(Request $request): ?string
-    {
-        $auth = $request->header('Authorization', '');
-        if (str_starts_with($auth, 'Bearer ')) {
-            return substr($auth, 7);
-        }
-
-        return $request->header('X-API-Key') ?? $request->input('api_key');
-    }
 }

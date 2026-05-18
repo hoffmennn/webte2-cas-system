@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 
 
 
+use App\Http\Controllers\Api\Concerns\ResolvesApiKey;
 use App\Http\Controllers\Controller;
 use App\Models\OctaveSession;
 use App\Models\RequestLog;
@@ -15,6 +16,8 @@ use Illuminate\Support\Str;
 
 class ExecuteController extends Controller
 {
+    use ResolvesApiKey;
+
     public function __construct(private OctaveService $octave) {}
 
     public function __invoke(Request $request): JsonResponse
@@ -49,13 +52,4 @@ class ExecuteController extends Controller
         ], $result['success'] ? 200 : 422);
     }
 
-    private function resolveApiKey(Request $request): ?string
-    {
-        $auth = $request->header('Authorization', '');
-        if (str_starts_with($auth, 'Bearer ')) {
-            return substr($auth, 7);
-        }
-
-        return $request->header('X-API-Key') ?? $request->input('api_key');
-    }
 }
