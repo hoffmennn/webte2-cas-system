@@ -159,16 +159,20 @@ class AnimationController extends Controller
     /**
      * Free IP geolocation via ip-api.com (no key required, rate-limited to 45 req/min).
      * Returns ['city' => ..., 'country' => ...] or nulls on failure.
+     *
+     * For private/loopback client IPs (Docker upstream, local dev) we query
+     * ip-api with no IP argument, which makes it geolocate *our* outbound IP.
+     * That keeps the stats panel populated during the demo defense; on the
+     * school server it resolves to the server's real public location.
      */
     private function resolveGeo(string $ip): array
     {
-        // Skip for private/loopback addresses
-        if (in_array($ip, ['127.0.0.1', '::1']) || str_starts_with($ip, '192.168.') || str_starts_with($ip, '10.')) {
-            return ['city' => null, 'country' => null];
-        }
+        $url = $this->isPrivateOrLoopback($ip)
+            ? 'http://ip-api.com/json/?fields=city,country,status'
+            : "http://ip-api.com/json/{$ip}?fields=city,country,status";
 
         try {
-            $json = @file_get_contents("http://ip-api.com/json/{$ip}?fields=city,country,status");
+            $json = @file_get_contents($url);
             if ($json) {
                 $data = json_decode($json, true);
                 if (($data['status'] ?? '') === 'success') {
@@ -180,6 +184,14 @@ class AnimationController extends Controller
         }
 
         return ['city' => null, 'country' => null];
+    }
+
+    private function isPrivateOrLoopback(string $ip): bool
+    {
+        return in_array($ip, ['127.0.0.1', '::1'], true)
+            || str_starts_with($ip, '192.168.')
+            || str_starts_with($ip, '10.')
+            || str_starts_with($ip, '172.');
     }
 
 }
