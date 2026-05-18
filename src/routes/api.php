@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AnimationController;
 use App\Http\Controllers\Api\ExecuteController;
 use App\Http\Controllers\Api\LogController;
+use App\Http\Controllers\Api\StatsController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('api.key')->group(function () {
@@ -18,4 +19,7 @@ Route::middleware('api.key')->group(function () {
 
     // CSV export of request logs (REQ 9)
     Route::get('/logs/export', [LogController::class, 'export']);
+
+    // Animation usage statistics (REQ 11)
+    Route::get('/stats', [StatsController::class, 'index']);
 });
