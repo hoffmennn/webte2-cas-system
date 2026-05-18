@@ -88,7 +88,6 @@ function ApiKeyInput({ draft, setDraft, onSave, isDirty, placeholder, saveLabel,
             <input type="password" placeholder={placeholder} value={draft}
                 onChange={e => setDraft(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && onSave()}
-                onBlur={() => { if (isDirty) onSave(); }}
                 title={isDirty ? unsavedLabel : ''}
                 style={{ padding: '5px 10px', border: `1px solid ${borderColor}`, background: isDirty ? '#fffbeb' : '#fff', borderRadius: 6, fontSize: 13, width: 190 }} />
             {isDirty && (
