@@ -6,6 +6,7 @@ import { TabBar } from './components/TabBar';
 import { ConsolePanel } from './components/ConsolePanel';
 import { SimPanel } from './components/sim/SimPanel';
 import { StatsPanel } from './components/StatsPanel';
+import { DocsPanel } from './components/DocsPanel';
 
 const LANG_STORAGE_KEY = 'cas_lang';
 const SUPPORTED_LANGS = ['en', 'sk'];
@@ -30,6 +31,7 @@ export default function App() {
         { key: 'pendulum', label: t.pendulum },
         { key: 'ballbeam', label: t.ballBeam },
         { key: 'stats',    label: t.tabs.stats },
+        { key: 'docs',     label: t.tabs.docs },
     ];
 
     return (
@@ -42,6 +44,7 @@ export default function App() {
                 {activeTab === 'pendulum' && <SimPanel type="inverted-pendulum" apiKey={apiKey} t={t} />}
                 {activeTab === 'ballbeam' && <SimPanel type="ball-beam"         apiKey={apiKey} t={t} />}
                 {activeTab === 'stats'    && <StatsPanel apiKey={apiKey} t={t} />}
+                {activeTab === 'docs'     && <DocsPanel t={t} />}
             </main>
         </div>
     );

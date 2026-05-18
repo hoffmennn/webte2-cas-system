@@ -12,10 +12,17 @@ export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
     const save = () => onSaveApiKey(draft);
 
     return (
-        <header className="bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between flex-wrap gap-3 py-2 min-h-[56px]">
-            <h1 className="m-0 text-lg font-bold text-slate-900 tracking-[-0.02em]">
-                {t.title}
-            </h1>
+        <header className="bg-white border-b border-slate-200 px-4 md:px-6 py-2 flex flex-col md:flex-row md:items-center md:justify-between gap-3 min-h-[56px]">
+            {/* Mobile: title shares row 1 with the lang toggle so it's not half-empty.
+                Desktop: this wrapper holds just the title; the toggle lives in the right group. */}
+            <div className="flex items-center justify-between md:justify-start">
+                <h1 className="m-0 text-lg font-bold text-slate-900 tracking-[-0.02em]">
+                    {t.title}
+                </h1>
+                <div className="md:hidden">
+                    <LangToggle lang={lang} setLang={setLang} />
+                </div>
+            </div>
             <div className="flex items-center gap-3 flex-wrap">
                 <ApiKeyInput
                     draft={draft}
@@ -28,7 +35,9 @@ export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
                 />
                 <ExportLogsButton apiKey={apiKey} label={t.header.export_logs} />
                 <KeyStatusBadge status={keyStatus} t={t} />
-                <LangToggle lang={lang} setLang={setLang} />
+                <div className="hidden md:block">
+                    <LangToggle lang={lang} setLang={setLang} />
+                </div>
             </div>
         </header>
     );

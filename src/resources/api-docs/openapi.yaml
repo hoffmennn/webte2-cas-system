@@ -1,0 +1,363 @@
+openapi: 3.0.3
+
+info:
+  title: WEBTE2 CAS API
+  version: 1.0.0
+  description: |
+    REST API for the CAS (Computer Aided System) project. The backend wraps
+    a local GNU Octave installation and exposes:
+
+    - **Console** – run arbitrary Octave commands with workspace persistence
+    - **Animations** – inverted pendulum and ball-on-beam LQR simulations
+    - **Logs export** – CSV dump of all request_logs
+    - **Stats** – per-animation usage with city/country attribution
+
+    All routes under `/api` require a valid API key. The key may be supplied
+    in any of three ways:
+
+    - `X-API-Key: <key>` header (preferred)
+    - `Authorization: Bearer <key>` header
+    - `?api_key=<key>` query string (last resort)
+
+servers:
+  - url: http://localhost:8080/api
+    description: Local development (Docker)
+  - url: https://node11.webte.fei.stuba.sk/api
+    description: School server
+
+security:
+  - apiKeyAuth: []
+
+tags:
+  - name: System
+    description: Liveness and authentication helpers.
+  - name: CAS
+    description: Octave command execution and simulations.
+  - name: Observability
+    description: Logs export and usage statistics.
+
+paths:
+  /ping:
+    get:
+      tags: [System]
+      summary: API key validation / liveness check
+      description: |
+        Returns `{ok: true}` with HTTP 200 when the API key is valid. The
+        frontend uses this to drive the green / red status badge in the
+        header. Does NOT write to `request_logs`, so it is safe to call
+        often.
+      responses:
+        '200':
+          description: API key is valid.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PingResponse' }
+        '401':
+          description: Missing or invalid API key.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /execute:
+    post:
+      tags: [CAS]
+      summary: Run an Octave command in a persistent session
+      description: |
+        Executes the supplied Octave command. Variables defined in earlier
+        requests are restored when the same `session_token` is supplied, so
+        the sequence `a = 1 + 1` then `a + 2` works across calls. If
+        `session_token` is omitted a new session is created and its token is
+        returned in the response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExecuteRequest' }
+      responses:
+        '200':
+          description: Command executed successfully.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecuteResponse' }
+        '422':
+          description: |
+            Octave reported an error (parse error, undefined variable, etc.).
+            The response shape is identical, but `success=false` and `error`
+            carries the message.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecuteResponse' }
+
+  /animate/inverted-pendulum:
+    post:
+      tags: [CAS]
+      summary: Inverted-pendulum LQR simulation
+      description: |
+        Runs a closed-loop LQR simulation of the inverted pendulum (CTMS
+        reference is in the assignment). Server-side `usleep` slowdown is
+        applied per `CAS_SLOWDOWN_COEFFICIENT`. Sets the `cas_visitor`
+        cookie when absent to drive the 10-minute stats cooldown.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvertedPendulumRequest' }
+      responses:
+        '200':
+          description: Frames computed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnimationResponse' }
+        '500':
+          description: Octave computation failed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /animate/ball-beam:
+    post:
+      tags: [CAS]
+      summary: Ball-and-beam LQR simulation
+      description: |
+        Runs a closed-loop LQR simulation of the ball-on-beam system.
+        Cookie / slowdown / stats behaviour matches the pendulum endpoint.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BallBeamRequest' }
+      responses:
+        '200':
+          description: Frames computed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnimationResponse' }
+        '500':
+          description: Octave computation failed.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /logs/export:
+    get:
+      tags: [Observability]
+      summary: Export request logs as CSV
+      description: |
+        Streams every row of `request_logs` as a CSV download. The full API
+        key is never exposed — only the last 4 characters appear, in the
+        `api_key_tail` column. The `output_truncated` column is capped at
+        500 characters.
+      responses:
+        '200':
+          description: CSV file (attachment).
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+
+  /stats:
+    get:
+      tags: [Observability]
+      summary: Aggregated animation usage statistics
+      description: |
+        Returns per-animation totals in `summary` plus the 100 most recent
+        usage events with city/country attribution in `details`. Each event
+        is gated by the 10-minute cooldown per visitor (configurable via
+        `CAS_STAT_COOLDOWN_MINUTES`).
+      responses:
+        '200':
+          description: Stats payload.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatsResponse' }
+
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        Default header-based auth. `Authorization: Bearer <key>` and
+        `?api_key=<key>` are also accepted by the middleware.
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Human-readable error message.
+        details:
+          type: string
+          nullable: true
+          description: Optional extra context (e.g. Octave stderr).
+      required: [error]
+
+    PingResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+      required: [ok]
+
+    ExecuteRequest:
+      type: object
+      properties:
+        command:
+          type: string
+          maxLength: 10000
+          description: Raw Octave command (may contain newlines).
+          example: a = 1 + 1
+        session_token:
+          type: string
+          maxLength: 64
+          nullable: true
+          description: |
+            Token returned by an earlier `/execute` call. Restores workspace
+            variables from that session. Omit to create a fresh session;
+            the new token is returned in the response.
+      required: [command]
+
+    ExecuteResponse:
+      type: object
+      properties:
+        output:
+          type: string
+          description: Octave stdout (printed by the command).
+        error:
+          type: string
+          nullable: true
+          description: Octave stderr / parse error message, `null` on success.
+        success:
+          type: boolean
+        session_token:
+          type: string
+          description: Persist this between calls to keep workspace variables alive.
+      required: [output, success, session_token]
+
+    InvertedPendulumRequest:
+      type: object
+      description: |
+        All parameters are optional; the backend supplies sensible defaults
+        matching the CTMS reference from the assignment.
+      properties:
+        M:
+          type: number
+          minimum: 0.1
+          maximum: 10
+          description: Cart mass [kg]
+        m:
+          type: number
+          minimum: 0.01
+          maximum: 5
+          description: Pendulum mass [kg]
+        b:
+          type: number
+          minimum: 0
+          maximum: 10
+          description: Cart friction
+        I:
+          type: number
+          minimum: 0.001
+          maximum: 1
+          description: Rod inertia
+        l:
+          type: number
+          minimum: 0.05
+          maximum: 2
+          description: Rod length [m]
+        theta0:
+          type: number
+          minimum: -0.5
+          maximum: 0.5
+          description: Initial angle [rad]
+        dt:
+          type: number
+          minimum: 0.01
+          maximum: 0.1
+          description: Time step [s]
+        tmax:
+          type: number
+          minimum: 1
+          maximum: 20
+          description: Simulation duration [s]
+
+    BallBeamRequest:
+      type: object
+      description: All parameters are optional; backend supplies defaults.
+      properties:
+        m:
+          type: number
+          minimum: 0.001
+          maximum: 5
+          description: Ball mass [kg]
+        R:
+          type: number
+          minimum: 0.001
+          maximum: 0.5
+          description: Ball radius [m]
+        J:
+          type: number
+          minimum: 1.0e-9
+          maximum: 0.01
+          description: Inertia
+        r0:
+          type: number
+          minimum: -1
+          maximum: 1
+          description: Initial ball position
+        dt:
+          type: number
+          minimum: 0.01
+          maximum: 0.1
+          description: Time step [s]
+        tmax:
+          type: number
+          minimum: 1
+          maximum: 20
+          description: Simulation duration [s]
+
+    AnimationResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          description: Frames as rows. Each row is `[t, ...state_variables]`.
+          items:
+            type: array
+            items: { type: number }
+        columns:
+          type: array
+          items: { type: string }
+          description: Column labels for each row of `data`.
+        success:
+          type: boolean
+      required: [data, columns, success]
+
+    StatsResponse:
+      type: object
+      properties:
+        summary:
+          type: array
+          items: { $ref: '#/components/schemas/StatsSummaryRow' }
+        details:
+          type: array
+          items: { $ref: '#/components/schemas/StatsDetailRow' }
+      required: [summary, details]
+
+    StatsSummaryRow:
+      type: object
+      properties:
+        animation_type:  { type: string, example: inverted_pendulum }
+        total_runs:      { type: integer }
+        unique_visitors: { type: integer }
+        last_used_at:    { type: string, format: date-time, nullable: true }
+
+    StatsDetailRow:
+      type: object
+      properties:
+        animation_type: { type: string }
+        used_at:        { type: string, format: date-time, nullable: true }
+        city:           { type: string, nullable: true }
+        country:        { type: string, nullable: true }

@@ -35,6 +35,12 @@ export const TRANSLATIONS = {
         },
         tabs: {
             stats: 'Stats',
+            docs: 'API Docs',
+        },
+        docs: {
+            title: 'API Documentation',
+            subtitle: 'Interactive reference (OpenAPI 3.0)',
+            download_pdf: 'Download PDF',
         },
         stats: {
             col_animation: 'Animation',
@@ -86,6 +92,12 @@ export const TRANSLATIONS = {
         },
         tabs: {
             stats: 'Štatistika',
+            docs: 'API Docs',
+        },
+        docs: {
+            title: 'API Dokumentácia',
+            subtitle: 'Interaktívny referenčný popis (OpenAPI 3.0)',
+            download_pdf: 'Stiahnuť PDF',
         },
         stats: {
             col_animation: 'Animácia',
