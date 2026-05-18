@@ -1,9 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { API_BASE } from '../lib/constants';
 
 export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
     const [draft, setDraft] = useState(apiKey);
 
+    // Re-sync the draft if the saved key changes from outside the header
+    // (e.g. on first load from localStorage, or future programmatic resets).
+    useEffect(() => { setDraft(apiKey); }, [apiKey]);
+
+    const isDirty = draft !== apiKey;
     const save = () => onSaveApiKey(draft);
 
     return (
@@ -13,7 +18,15 @@ export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <LangToggle lang={lang} setLang={setLang} />
-                <ApiKeyInput draft={draft} setDraft={setDraft} onSave={save} placeholder={t.header.api_key_placeholder} saveLabel={t.save} />
+                <ApiKeyInput
+                    draft={draft}
+                    setDraft={setDraft}
+                    onSave={save}
+                    isDirty={isDirty}
+                    placeholder={t.header.api_key_placeholder}
+                    saveLabel={t.save}
+                    unsavedLabel={t.header.unsaved}
+                />
                 <ExportLogsButton apiKey={apiKey} label={t.header.export_logs} />
                 <KeyStatusBadge status={keyStatus} t={t} />
             </div>
@@ -66,15 +79,25 @@ function LangToggle({ lang, setLang }) {
     );
 }
 
-function ApiKeyInput({ draft, setDraft, onSave, placeholder, saveLabel }) {
+function ApiKeyInput({ draft, setDraft, onSave, isDirty, placeholder, saveLabel, unsavedLabel }) {
+    const borderColor = isDirty ? '#f59e0b' : '#e2e8f0';
+    const buttonBg    = isDirty ? '#f59e0b' : '#0f172a';
+
     return (
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 6, alignItems: 'center', position: 'relative' }}>
             <input type="password" placeholder={placeholder} value={draft}
                 onChange={e => setDraft(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && onSave()}
-                style={{ padding: '5px 10px', border: '1px solid #e2e8f0', borderRadius: 6, fontSize: 13, width: 190 }} />
+                onBlur={() => { if (isDirty) onSave(); }}
+                title={isDirty ? unsavedLabel : ''}
+                style={{ padding: '5px 10px', border: `1px solid ${borderColor}`, background: isDirty ? '#fffbeb' : '#fff', borderRadius: 6, fontSize: 13, width: 190 }} />
+            {isDirty && (
+                <span style={{ position: 'absolute', left: 6, top: -8, fontSize: 10, fontWeight: 600, color: '#b45309', background: '#fffbeb', padding: '0 4px' }}>
+                    {unsavedLabel}
+                </span>
+            )}
             <button onClick={onSave}
-                style={{ padding: '5px 14px', background: '#0f172a', color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+                style={{ padding: '5px 14px', background: buttonBg, color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
                 {saveLabel}
             </button>
         </div>

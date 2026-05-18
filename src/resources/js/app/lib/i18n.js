@@ -23,6 +23,7 @@ export const TRANSLATIONS = {
         header: {
             export_logs: 'Export logs',
             api_key_placeholder: 'API key',
+            unsaved: 'Unsaved',
         },
         consolePanel: {
             placeholder: '(output will appear here)',
@@ -73,6 +74,7 @@ export const TRANSLATIONS = {
         header: {
             export_logs: 'Exportovať logy',
             api_key_placeholder: 'API kľúč',
+            unsaved: 'Neuložené',
         },
         consolePanel: {
             placeholder: '(výstup sa zobrazí tu)',
