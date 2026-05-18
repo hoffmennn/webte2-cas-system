@@ -1,32 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE } from '../lib/constants';
 
-const TABLE_STYLE = {
-    width: '100%',
-    borderCollapse: 'collapse',
-    fontSize: 13,
-    background: '#fff',
-    border: '1px solid #e5e7eb',
-    borderRadius: 8,
-    overflow: 'hidden',
-};
-
-const TH_STYLE = {
-    textAlign: 'left',
-    padding: '8px 10px',
-    borderBottom: '1px solid #e5e7eb',
-    background: '#f8fafc',
-    fontWeight: 600,
-    color: '#0f172a',
-};
-
-const TD_STYLE = {
-    padding: '8px 10px',
-    borderBottom: '1px solid #f1f5f9',
-    color: '#334155',
-};
-
-const SECTION_TITLE_STYLE = { margin: '16px 0 8px', fontSize: 14, fontWeight: 600, color: '#0f172a' };
+const TABLE_CLASS = 'w-full border-collapse text-[13px] bg-white border border-gray-200 rounded-lg overflow-hidden';
+const TH_CLASS    = 'text-left px-2.5 py-2 border-b border-gray-200 bg-slate-50 font-semibold text-slate-900';
+const TD_CLASS    = 'px-2.5 py-2 border-b border-slate-100 text-slate-700';
+const SECTION_TITLE_CLASS = 'mt-4 mb-2 text-sm font-semibold text-slate-900';
 
 function animationLabel(type, t) {
     if (type === 'inverted_pendulum') return t.pendulum;
@@ -51,23 +29,23 @@ export function StatsPanel({ apiKey, t }) {
 
     if (!apiKey) {
         return (
-            <div style={{ padding: '12px 16px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 8, color: '#92400e', fontSize: 13 }}>
+            <div className="px-4 py-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-[13px]">
                 {t.sim.need_api_key}
             </div>
         );
     }
 
     if (error) {
-        return <p style={{ color: '#dc2626', fontSize: 13 }}>{error}</p>;
+        return <p className="text-red-600 text-[13px]">{error}</p>;
     }
 
     if (!data) {
-        return <p style={{ color: '#9ca3af', fontSize: 13 }}>{t.loading}</p>;
+        return <p className="text-gray-400 text-[13px]">{t.loading}</p>;
     }
 
     const isEmpty = data.summary.length === 0 && data.details.length === 0;
     if (isEmpty) {
-        return <p style={{ color: '#9ca3af', fontSize: 13 }}>{t.stats.empty}</p>;
+        return <p className="text-gray-400 text-[13px]">{t.stats.empty}</p>;
     }
 
     const filteredDetails = selectedType
@@ -75,8 +53,8 @@ export function StatsPanel({ apiKey, t }) {
         : data.details;
 
     return (
-        <div style={{ maxWidth: 980 }}>
-            <h3 style={SECTION_TITLE_STYLE}>{t.stats.section_summary}</h3>
+        <div className="max-w-[980px]">
+            <h3 className={SECTION_TITLE_CLASS}>{t.stats.section_summary}</h3>
             <SummaryTable
                 rows={data.summary}
                 selectedType={selectedType}
@@ -84,13 +62,13 @@ export function StatsPanel({ apiKey, t }) {
                 t={t}
             />
 
-            <h3 style={SECTION_TITLE_STYLE}>{t.stats.section_details}</h3>
+            <h3 className={SECTION_TITLE_CLASS}>{t.stats.section_details}</h3>
             <DetailsTable rows={filteredDetails} t={t} />
 
             {selectedType && (
                 <button
                     onClick={() => setSelectedType(null)}
-                    style={{ marginTop: 8, padding: '4px 10px', background: '#fff', border: '1px solid #d1d5db', borderRadius: 6, cursor: 'pointer', fontSize: 12, color: '#0f172a' }}>
+                    className="mt-2 px-2.5 py-1 bg-white border border-gray-300 rounded-md cursor-pointer text-xs text-slate-900">
                     {t.stats.clear_filter}
                 </button>
             )}
@@ -100,56 +78,60 @@ export function StatsPanel({ apiKey, t }) {
 
 function SummaryTable({ rows, selectedType, onSelect, t }) {
     return (
-        <table style={TABLE_STYLE}>
-            <thead>
-                <tr>
-                    <th style={TH_STYLE}>{t.stats.col_animation}</th>
-                    <th style={TH_STYLE}>{t.stats.col_runs}</th>
-                    <th style={TH_STYLE}>{t.stats.col_visitors}</th>
-                    <th style={TH_STYLE}>{t.stats.col_last_used}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {rows.map(row => {
-                    const active = row.animation_type === selectedType;
-                    return (
-                        <tr key={row.animation_type}
-                            onClick={() => onSelect(active ? null : row.animation_type)}
-                            style={{ cursor: 'pointer', background: active ? '#eff6ff' : 'transparent' }}>
-                            <td style={TD_STYLE}>{animationLabel(row.animation_type, t)}</td>
-                            <td style={TD_STYLE}>{row.total_runs}</td>
-                            <td style={TD_STYLE}>{row.unique_visitors}</td>
-                            <td style={TD_STYLE}>{formatTimestamp(row.last_used_at)}</td>
-                        </tr>
-                    );
-                })}
-            </tbody>
-        </table>
+        <div className="overflow-x-auto">
+            <table className={TABLE_CLASS}>
+                <thead>
+                    <tr>
+                        <th className={TH_CLASS}>{t.stats.col_animation}</th>
+                        <th className={TH_CLASS}>{t.stats.col_runs}</th>
+                        <th className={TH_CLASS}>{t.stats.col_visitors}</th>
+                        <th className={TH_CLASS}>{t.stats.col_last_used}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {rows.map(row => {
+                        const active = row.animation_type === selectedType;
+                        return (
+                            <tr key={row.animation_type}
+                                onClick={() => onSelect(active ? null : row.animation_type)}
+                                className={`cursor-pointer ${active ? 'bg-blue-50' : 'bg-transparent'}`}>
+                                <td className={TD_CLASS}>{animationLabel(row.animation_type, t)}</td>
+                                <td className={TD_CLASS}>{row.total_runs}</td>
+                                <td className={TD_CLASS}>{row.unique_visitors}</td>
+                                <td className={TD_CLASS}>{formatTimestamp(row.last_used_at)}</td>
+                            </tr>
+                        );
+                    })}
+                </tbody>
+            </table>
+        </div>
     );
 }
 
 function DetailsTable({ rows, t }) {
     return (
-        <table style={TABLE_STYLE}>
-            <thead>
-                <tr>
-                    <th style={TH_STYLE}>{t.stats.col_animation}</th>
-                    <th style={TH_STYLE}>{t.stats.col_time}</th>
-                    <th style={TH_STYLE}>{t.stats.col_city}</th>
-                    <th style={TH_STYLE}>{t.stats.col_country}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {rows.map((row, i) => (
-                    <tr key={i}>
-                        <td style={TD_STYLE}>{animationLabel(row.animation_type, t)}</td>
-                        <td style={TD_STYLE}>{formatTimestamp(row.used_at)}</td>
-                        <td style={TD_STYLE}>{row.city || '—'}</td>
-                        <td style={TD_STYLE}>{row.country || '—'}</td>
+        <div className="overflow-x-auto">
+            <table className={TABLE_CLASS}>
+                <thead>
+                    <tr>
+                        <th className={TH_CLASS}>{t.stats.col_animation}</th>
+                        <th className={TH_CLASS}>{t.stats.col_time}</th>
+                        <th className={TH_CLASS}>{t.stats.col_city}</th>
+                        <th className={TH_CLASS}>{t.stats.col_country}</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {rows.map((row, i) => (
+                        <tr key={i}>
+                            <td className={TD_CLASS}>{animationLabel(row.animation_type, t)}</td>
+                            <td className={TD_CLASS}>{formatTimestamp(row.used_at)}</td>
+                            <td className={TD_CLASS}>{row.city || '—'}</td>
+                            <td className={TD_CLASS}>{row.country || '—'}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     );
 }
 

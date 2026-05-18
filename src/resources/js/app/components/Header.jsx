@@ -12,11 +12,11 @@ export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
     const save = () => onSaveApiKey(draft);
 
     return (
-        <header style={{ background: '#fff', borderBottom: '1px solid #e2e8f0', padding: '0 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
-            <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#0f172a', letterSpacing: '-0.02em' }}>
+        <header className="bg-white border-b border-slate-200 px-4 md:px-6 flex items-center justify-between flex-wrap gap-3 py-2 min-h-[56px]">
+            <h1 className="m-0 text-lg font-bold text-slate-900 tracking-[-0.02em]">
                 {t.title}
             </h1>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="flex items-center gap-3 flex-wrap">
                 <LangToggle lang={lang} setLang={setLang} />
                 <ApiKeyInput
                     draft={draft}
@@ -60,7 +60,7 @@ function ExportLogsButton({ apiKey, label }) {
         <button
             onClick={() => downloadLogsCsv(apiKey).catch(err => console.error(err))}
             disabled={disabled}
-            style={{ padding: '5px 12px', background: disabled ? '#e5e7eb' : '#fff', color: disabled ? '#9ca3af' : '#0f172a', border: '1px solid #e2e8f0', borderRadius: 6, cursor: disabled ? 'default' : 'pointer', fontSize: 12, fontWeight: 500 }}>
+            className={`px-3 py-[5px] border border-slate-200 rounded-md text-xs font-medium ${disabled ? 'bg-gray-200 text-gray-400 cursor-default' : 'bg-white text-slate-900 cursor-pointer'}`}>
             {label}
         </button>
     );
@@ -68,10 +68,10 @@ function ExportLogsButton({ apiKey, label }) {
 
 function LangToggle({ lang, setLang }) {
     return (
-        <div style={{ display: 'flex', border: '1px solid #e2e8f0', borderRadius: 6, overflow: 'hidden' }}>
+        <div className="flex border border-slate-200 rounded-md overflow-hidden">
             {['en', 'sk'].map(l => (
                 <button key={l} onClick={() => setLang(l)}
-                    style={{ minWidth: 44, padding: '4px 12px', border: 'none', cursor: 'pointer', background: lang === l ? '#0f172a' : '#fff', color: lang === l ? '#fff' : '#64748b', fontWeight: lang === l ? 600 : 400, fontSize: 12, textAlign: 'center' }}>
+                    className={`min-w-[44px] py-1 px-3 border-0 cursor-pointer text-xs text-center ${lang === l ? 'bg-slate-900 text-white font-semibold' : 'bg-white text-slate-500 font-normal'}`}>
                     {l.toUpperCase()}
                 </button>
             ))}
@@ -80,23 +80,20 @@ function LangToggle({ lang, setLang }) {
 }
 
 function ApiKeyInput({ draft, setDraft, onSave, isDirty, placeholder, saveLabel, unsavedLabel }) {
-    const borderColor = isDirty ? '#f59e0b' : '#e2e8f0';
-    const buttonBg    = isDirty ? '#f59e0b' : '#0f172a';
-
     return (
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center', position: 'relative' }}>
+        <div className="flex gap-1.5 items-center relative">
             <input type="password" placeholder={placeholder} value={draft}
                 onChange={e => setDraft(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && onSave()}
                 title={isDirty ? unsavedLabel : ''}
-                style={{ padding: '5px 10px', border: `1px solid ${borderColor}`, background: isDirty ? '#fffbeb' : '#fff', borderRadius: 6, fontSize: 13, width: 190 }} />
+                className={`px-2.5 py-[5px] border rounded-md text-[13px] w-[190px] max-w-full outline-none ${isDirty ? 'border-amber-500 bg-amber-50' : 'border-slate-200 bg-white'}`} />
             {isDirty && (
-                <span style={{ position: 'absolute', left: 6, top: -8, fontSize: 10, fontWeight: 600, color: '#b45309', background: '#fffbeb', padding: '0 4px' }}>
+                <span className="absolute left-1.5 -top-2 text-[10px] font-semibold text-amber-700 bg-amber-50 px-1">
                     {unsavedLabel}
                 </span>
             )}
             <button onClick={onSave}
-                style={{ padding: '5px 14px', background: buttonBg, color: '#fff', border: 'none', borderRadius: 6, cursor: 'pointer', fontSize: 13, fontWeight: 600 }}>
+                className={`px-[14px] py-[5px] text-white border-0 rounded-md cursor-pointer text-[13px] font-semibold ${isDirty ? 'bg-amber-500' : 'bg-slate-900'}`}>
                 {saveLabel}
             </button>
         </div>
@@ -104,24 +101,23 @@ function ApiKeyInput({ draft, setDraft, onSave, isDirty, placeholder, saveLabel,
 }
 
 const BADGE_STYLES = {
-    valid:    { color: '#16a34a', dot: '#16a34a' }, // green
-    checking: { color: '#ca8a04', dot: '#eab308' }, // amber, pulsing
-    invalid:  { color: '#dc2626', dot: '#dc2626' }, // red
+    valid:    { textColor: 'text-green-600',  dotColor: 'bg-green-600' },
+    checking: { textColor: 'text-yellow-600', dotColor: 'bg-yellow-500' },
+    invalid:  { textColor: 'text-red-600',    dotColor: 'bg-red-600' },
 };
 
 function KeyStatusBadge({ status, t }) {
     if (status === 'idle') return null;
-    const { color, dot } = BADGE_STYLES[status];
+    const { textColor, dotColor } = BADGE_STYLES[status];
     const label = status === 'valid'    ? t.readyLabel
                 : status === 'checking' ? t.checkingLabel
                 : t.invalidKeyLabel;
 
     return (
-        <span style={{ fontSize: 12, color, display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{
-                width: 7, height: 7, background: dot, borderRadius: '50%', display: 'inline-block',
-                animation: status === 'checking' ? 'cas-pulse 1s ease-in-out infinite' : 'none',
-            }} />
+        <span className={`text-xs flex items-center gap-1 ${textColor}`}>
+            <span
+                className={`w-[7px] h-[7px] rounded-full inline-block ${dotColor}`}
+                style={{ animation: status === 'checking' ? 'cas-pulse 1s ease-in-out infinite' : 'none' }} />
             {label}
         </span>
     );

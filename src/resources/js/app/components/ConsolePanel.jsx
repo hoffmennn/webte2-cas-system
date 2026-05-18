@@ -40,22 +40,24 @@ export function ConsolePanel({ apiKey, t }) {
         setOutput('');
     };
 
+    const runDisabled = loading || !apiKey || !command.trim();
+
     return (
-        <div style={{ maxWidth: 860 }}>
-            <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 10 }}>
-                <span style={{ fontSize: 12, color: '#9ca3af' }}>
-                    {t.session}: <code style={{ fontSize: 11, background: '#f3f4f6', padding: '1px 4px', borderRadius: 3 }}>
+        <div className="max-w-[860px]">
+            <div className="flex gap-2 items-center mb-2.5 flex-wrap">
+                <span className="text-xs text-gray-400">
+                    {t.session}: <code className="text-[11px] bg-gray-100 px-1 py-px rounded-[3px]">
                         {session ? session.slice(0, 20) + '…' : '(none)'}
                     </code>
                 </span>
                 <button onClick={newSession}
-                    style={{ fontSize: 12, padding: '2px 10px', border: '1px solid #d1d5db', borderRadius: 4, cursor: 'pointer', background: '#fff' }}>
+                    className="text-xs px-2.5 py-0.5 border border-gray-300 rounded cursor-pointer bg-white">
                     {t.newSession}
                 </button>
             </div>
 
             {!apiKey && (
-                <div style={{ padding: '10px 14px', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: 7, color: '#92400e', fontSize: 13, marginBottom: 10 }}>
+                <div className="px-3.5 py-2.5 bg-amber-50 border border-amber-200 rounded-[7px] text-amber-800 text-[13px] mb-2.5">
                     ⚠ {t.noApiKey}
                 </div>
             )}
@@ -63,21 +65,21 @@ export function ConsolePanel({ apiKey, t }) {
             <textarea value={command} onChange={e => setCommand(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) execute(); }}
                 placeholder={t.commandHint + '\n\nExample:\na = 1 + 1\na + 2'}
-                style={{ width: '100%', minHeight: 130, padding: 12, fontFamily: 'monospace', fontSize: 13, border: '1px solid #374151', borderRadius: 7, resize: 'vertical', background: '#1e1e2e', color: '#cdd6f4', boxSizing: 'border-box', outline: 'none' }}
+                className="w-full min-h-[130px] p-3 font-mono text-[13px] border border-gray-700 rounded-[7px] resize-y bg-[#1e1e2e] text-[#cdd6f4] box-border outline-none"
             />
 
-            <div style={{ display: 'flex', gap: 8, margin: '8px 0' }}>
-                <button onClick={execute} disabled={loading || !apiKey || !command.trim()}
-                    style={{ padding: '8px 24px', background: loading || !apiKey || !command.trim() ? '#9ca3af' : '#3b82f6', color: '#fff', border: 'none', borderRadius: 7, cursor: 'pointer', fontWeight: 600 }}>
+            <div className="flex gap-2 my-2 flex-wrap">
+                <button onClick={execute} disabled={runDisabled}
+                    className={`px-6 py-2 text-white border-0 rounded-[7px] font-semibold ${runDisabled ? 'bg-gray-400 cursor-default' : 'bg-blue-500 cursor-pointer'}`}>
                     {loading ? t.loading : t.execute}
                 </button>
                 <button onClick={() => setOutput('')}
-                    style={{ padding: '8px 16px', border: '1px solid #d1d5db', borderRadius: 7, cursor: 'pointer', background: '#fff' }}>
+                    className="px-4 py-2 border border-gray-300 rounded-[7px] cursor-pointer bg-white">
                     {t.clearOutput}
                 </button>
             </div>
 
-            <pre style={{ background: '#1e1e2e', color: '#cdd6f4', padding: 16, borderRadius: 7, minHeight: 220, fontFamily: 'monospace', fontSize: 13, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+            <pre className="bg-[#1e1e2e] text-[#cdd6f4] p-4 rounded-[7px] min-h-[220px] font-mono text-[13px] overflow-x-auto whitespace-pre-wrap break-words m-0">
                 {output || t.consolePanel.placeholder}
             </pre>
         </div>

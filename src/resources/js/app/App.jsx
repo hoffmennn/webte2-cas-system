@@ -33,11 +33,11 @@ export default function App() {
     ];
 
     return (
-        <div style={{ minHeight: '100vh', background: '#f1f5f9', fontFamily: '"Inter", system-ui, sans-serif' }}>
+        <div className="min-h-screen bg-slate-100 font-sans">
             <Header lang={lang} setLang={setLang} apiKey={apiKey} keyStatus={keyStatus} onSaveApiKey={saveApiKey} t={t} />
             <TabBar tabs={tabs} active={activeTab} onSelect={setActiveTab} />
 
-            <main style={{ maxWidth: 1200, margin: '0 auto', padding: 28 }}>
+            <main className="max-w-[1200px] mx-auto p-4 md:p-7">
                 {activeTab === 'console'  && <ConsolePanel apiKey={apiKey} t={t} />}
                 {activeTab === 'pendulum' && <SimPanel type="inverted-pendulum" apiKey={apiKey} t={t} />}
                 {activeTab === 'ballbeam' && <SimPanel type="ball-beam"         apiKey={apiKey} t={t} />}

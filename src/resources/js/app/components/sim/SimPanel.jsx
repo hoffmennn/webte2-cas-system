@@ -66,27 +66,28 @@ export function SimPanel({ type, apiKey, t }) {
 
     const labels = SERIES_LABELS[type];
     const Canvas = type === 'inverted-pendulum' ? PendulumCanvas : BallBeamCanvas;
+    const runDisabled = loading || !apiKey;
 
     return (
-        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 24, alignItems: 'start' }}>
+        <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6 items-start">
             {/* ─── Params ─── */}
-            <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 10, padding: 16 }}>
-                <h3 style={{ margin: '0 0 12px', fontWeight: 600, fontSize: 14 }}>{t.params}</h3>
+            <div className="bg-white border border-gray-200 rounded-[10px] p-4">
+                <h3 className="mt-0 mb-3 font-semibold text-sm">{t.params}</h3>
                 {paramDefs.map(p => (
-                    <div key={p.key} style={{ marginBottom: 10 }}>
-                        <label style={{ display: 'block', fontSize: 11, color: '#6b7280', marginBottom: 3 }}>{p.label}</label>
+                    <div key={p.key} className="mb-2.5">
+                        <label className="block text-[11px] text-gray-500 mb-[3px]">{p.label}</label>
                         <input type="number" value={params[p.key]} step={p.step}
                             onChange={e => setParams(prev => ({ ...prev, [p.key]: parseFloat(e.target.value) || 0 }))}
-                            style={{ width: '100%', padding: '5px 8px', border: '1px solid #d1d5db', borderRadius: 5, fontSize: 13, boxSizing: 'border-box' }} />
+                            className="w-full py-[5px] px-2 border border-gray-300 rounded-[5px] text-[13px] box-border" />
                     </div>
                 ))}
-                <button onClick={run} disabled={loading || !apiKey}
-                    style={{ width: '100%', padding: '9px 0', background: loading || !apiKey ? '#9ca3af' : '#3b82f6', color: '#fff', border: 'none', borderRadius: 7, cursor: loading || !apiKey ? 'default' : 'pointer', fontWeight: 600, marginTop: 4 }}>
+                <button onClick={run} disabled={runDisabled}
+                    className={`w-full py-[9px] text-white border-0 rounded-[7px] font-semibold mt-1 ${runDisabled ? 'bg-gray-400 cursor-default' : 'bg-blue-500 cursor-pointer'}`}>
                     {loading ? t.loading : t.run}
                 </button>
-                {!apiKey && <p style={{ color: '#f59e0b', fontSize: 12, margin: '8px 0 0' }}>{t.sim.need_api_key}</p>}
+                {!apiKey && <p className="text-amber-500 text-xs mt-2 mb-0">{t.sim.need_api_key}</p>}
                 {error && (
-                    <div style={{ marginTop: 10, padding: 8, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, color: '#dc2626', fontSize: 12 }}>
+                    <div className="mt-2.5 p-2 bg-red-50 border border-red-200 rounded-md text-red-600 text-xs">
                         {error}
                     </div>
                 )}
@@ -99,25 +100,25 @@ export function SimPanel({ type, apiKey, t }) {
                         <Canvas frames={frames} idx={idx} />
 
                         {/* Playback */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '8px 0' }}>
+                        <div className="flex items-center gap-2 my-2">
                             <button onClick={() => setPlaying(p => !p)}
-                                style={{ padding: '4px 14px', border: '1px solid #d1d5db', borderRadius: 5, cursor: 'pointer', background: '#fff', fontSize: 16 }}>
+                                className="py-1 px-3.5 border border-gray-300 rounded-[5px] cursor-pointer bg-white text-base">
                                 {playing ? '⏸' : '▶'}
                             </button>
                             <button onClick={() => { setIdx(0); setPlaying(false); }}
-                                style={{ padding: '4px 14px', border: '1px solid #d1d5db', borderRadius: 5, cursor: 'pointer', background: '#fff', fontSize: 16 }}>
+                                className="py-1 px-3.5 border border-gray-300 rounded-[5px] cursor-pointer bg-white text-base">
                                 ⏮
                             </button>
                             <input type="range" min={0} max={frames.length - 1} value={idx}
                                 onChange={e => { setPlaying(false); setIdx(+e.target.value); }}
-                                style={{ flex: 1 }} />
-                            <span style={{ fontSize: 12, color: '#9ca3af', whiteSpace: 'nowrap' }}>{idx + 1}/{frames.length}</span>
+                                className="flex-1" />
+                            <span className="text-xs text-gray-400 whitespace-nowrap">{idx + 1}/{frames.length}</span>
                         </div>
 
                         {/* Series selector */}
-                        <div style={{ display: 'flex', gap: 14, marginBottom: 8, flexWrap: 'wrap' }}>
+                        <div className="flex gap-3.5 mb-2 flex-wrap">
                             {[1, 2, 3, 4].map((seriesIdx, paletteIdx) => (
-                                <label key={seriesIdx} style={{ fontSize: 12, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}>
+                                <label key={seriesIdx} className="text-xs cursor-pointer flex items-center gap-[5px]">
                                     <input type="checkbox" checked={series.includes(seriesIdx)}
                                         onChange={e => setSeries(prev => e.target.checked ? [...prev, seriesIdx] : prev.filter(s => s !== seriesIdx))} />
                                     <span style={{ color: CHART_COLORS[paletteIdx] }}>{labels[seriesIdx]}</span>
@@ -125,14 +126,14 @@ export function SimPanel({ type, apiKey, t }) {
                             ))}
                         </div>
 
-                        <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '8px 8px 4px' }}>
+                        <div className="bg-white border border-gray-200 rounded-lg pt-2 px-2 pb-1">
                             <LineChart data={frames} series={[...series].sort()} height={180} idx={idx} />
                         </div>
                     </>
                 ) : (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 320, border: '2px dashed #e5e7eb', borderRadius: 10, color: '#9ca3af', flexDirection: 'column', gap: 8 }}>
-                        <span style={{ fontSize: 32 }}>▶</span>
-                        <span style={{ fontSize: 14 }}>{t.sim.empty_hint}</span>
+                    <div className="flex items-center justify-center h-80 border-2 border-dashed border-gray-200 rounded-[10px] text-gray-400 flex-col gap-2">
+                        <span className="text-[32px]">▶</span>
+                        <span className="text-sm">{t.sim.empty_hint}</span>
                     </div>
                 )}
             </div>
