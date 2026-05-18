@@ -21,6 +21,9 @@ export const TRANSLATIONS = {
         invalidKeyLabel: 'Invalid Key',
         dt: 'Time step dt (s)',
         tmax: 'Duration tmax (s)',
+        header: {
+            export_logs: 'Export logs',
+        },
     },
     sk: {
         title: 'CAS Rozhranie',
@@ -44,5 +47,8 @@ export const TRANSLATIONS = {
         invalidKeyLabel: 'Neplatný kľúč',
         dt: 'Časový krok dt (s)',
         tmax: 'Trvanie tmax (s)',
+        header: {
+            export_logs: 'Exportovať logy',
+        },
     },
 };

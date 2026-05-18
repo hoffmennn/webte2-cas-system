@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { API_BASE } from '../lib/constants';
 
 export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
     const [draft, setDraft] = useState(apiKey);
@@ -13,9 +14,42 @@ export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <LangToggle lang={lang} setLang={setLang} />
                 <ApiKeyInput draft={draft} setDraft={setDraft} onSave={save} placeholder={t.apiKey} saveLabel={t.save} />
+                <ExportLogsButton apiKey={apiKey} label={t.header.export_logs} />
                 <KeyStatusBadge status={keyStatus} t={t} />
             </div>
         </header>
+    );
+}
+
+async function downloadLogsCsv(apiKey) {
+    const response = await fetch(`${API_BASE}/logs/export`, {
+        headers: { 'X-API-Key': apiKey },
+    });
+    if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+    }
+    const blob = await response.blob();
+    const filenameFromHeader = (response.headers.get('Content-Disposition') || '')
+        .match(/filename="?([^"]+)"?/)?.[1];
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filenameFromHeader || 'cas_logs.csv';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+function ExportLogsButton({ apiKey, label }) {
+    const disabled = !apiKey;
+    return (
+        <button
+            onClick={() => downloadLogsCsv(apiKey).catch(err => console.error(err))}
+            disabled={disabled}
+            style={{ padding: '5px 12px', background: disabled ? '#e5e7eb' : '#fff', color: disabled ? '#9ca3af' : '#0f172a', border: '1px solid #e2e8f0', borderRadius: 6, cursor: disabled ? 'default' : 'pointer', fontSize: 12, fontWeight: 500 }}>
+            {label}
+        </button>
     );
 }
 
