@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { TRANSLATIONS } from './lib/i18n';
 import { useApiKey } from './hooks/useApiKey';
 import { Header } from './components/Header';
@@ -6,9 +6,20 @@ import { TabBar } from './components/TabBar';
 import { ConsolePanel } from './components/ConsolePanel';
 import { SimPanel } from './components/sim/SimPanel';
 
+const LANG_STORAGE_KEY = 'cas_lang';
+const SUPPORTED_LANGS = ['en', 'sk'];
+
 export default function App() {
-    const [lang, setLang] = useState('en');
+    const [lang, setLang] = useState(() => {
+        const stored = localStorage.getItem(LANG_STORAGE_KEY);
+        return SUPPORTED_LANGS.includes(stored) ? stored : 'en';
+    });
     const [activeTab, setActiveTab] = useState('console');
+
+    useEffect(() => {
+        localStorage.setItem(LANG_STORAGE_KEY, lang);
+        document.documentElement.lang = lang;
+    }, [lang]);
     const { apiKey, status: keyStatus, save: saveApiKey } = useApiKey();
 
     const t = TRANSLATIONS[lang];
