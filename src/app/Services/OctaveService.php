@@ -101,14 +101,13 @@ OCTAVE;
      * Returns JSON array: [[t, r, r_dot, alpha, alpha_dot], ...]
      *
      * State: r = ball position (m), alpha = beam angle (rad).
-     * Parameters match the CTMS ball-and-beam model.
+     * Linearized model and H coefficient follow the reference Octave script
+     * (workspace root `gulicka.txt`): H = -m*g/(J/R^2 + m), with g = -9.8.
      */
     public function computeBallBeam(array $params): array
     {
         $m     = (float) ($params['m']    ?? 0.111);
         $R     = (float) ($params['R']    ?? 0.015);
-        $d     = (float) ($params['d']    ?? 0.03);
-        $L     = (float) ($params['L']    ?? 1.0);
         $Jval  = (float) ($params['J']    ?? 9.99e-6);
         $r0    = (float) ($params['r0']   ?? 0.0);
         $dt    = max(0.01, min(0.1,  (float) ($params['dt']   ?? 0.05)));
@@ -117,8 +116,8 @@ OCTAVE;
         $script = <<<OCTAVE
 more off;
 pkg load control;
-m_b={$m}; R_b={$R}; d_b={$d}; g_b=9.8; L_b={$L}; J_b={$Jval};
-H_ = -(m_b*g_b*d_b) / (L_b*(J_b/R_b^2+m_b));
+m_b={$m}; R_b={$R}; g_b=-9.8; J_b={$Jval};
+H_ = -m_b*g_b/(J_b/(R_b^2)+m_b);
 A_ = [0 1 0 0; 0 0 H_ 0; 0 0 0 1; 0 0 0 0];
 B_ = [0; 0; 0; 1];
 C_ = [1 0 0 0; 0 0 1 0];

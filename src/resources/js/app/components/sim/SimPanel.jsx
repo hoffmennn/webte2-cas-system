@@ -19,8 +19,6 @@ const PENDULUM_PARAMS = [
 const BALLBEAM_PARAMS = [
     { key: 'm',    label: 'Ball mass m (kg)',        default: 0.111,   step: 0.01 },
     { key: 'R',    label: 'Ball radius R (m)',       default: 0.015,   step: 0.001 },
-    { key: 'd',    label: 'Gear ratio d',            default: 0.03,    step: 0.005 },
-    { key: 'L',    label: 'Beam length L (m)',       default: 1.0,     step: 0.1 },
     { key: 'J',    label: 'Inertia J',               default: 9.99e-6, step: 1e-6 },
     { key: 'r0',   label: 'Initial position r₀ (m)', default: 0.0,     step: 0.05 },
     { key: 'dt',   label: 'Time step dt (s)',        default: 0.05,    step: 0.01 },

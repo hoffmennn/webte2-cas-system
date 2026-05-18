@@ -50,15 +50,13 @@ class AnimationController extends Controller
 
     /**
      * POST /api/animate/ball-beam
-     * Accepted params: m, R, d, L, J, r0, dt, tmax
+     * Accepted params: m, R, J, r0, dt, tmax
      */
     public function ballBeam(Request $request): JsonResponse
     {
         $params = $request->validate([
             'm'    => 'nullable|numeric|min:0.001|max:5',
             'R'    => 'nullable|numeric|min:0.001|max:0.5',
-            'd'    => 'nullable|numeric|min:0.001|max:0.5',
-            'L'    => 'nullable|numeric|min:0.1|max:5',
             'J'    => 'nullable|numeric|min:1.0e-9|max:0.01',
             'r0'   => 'nullable|numeric|min:-1|max:1',
             'dt'   => 'nullable|numeric|min:0.01|max:0.1',
