@@ -23,10 +23,10 @@ export function ConsolePanel({ apiKey, t }) {
             }
             const resultLine = json.success
                 ? (json.output || '(no output)')
-                : `[ERROR] ${json.error || 'Unknown error'}`;
+                : `${t.console.error_prefix} ${json.error || 'Unknown error'}`;
             setOutput(prev => prev + `>> ${command}\n${resultLine}\n\n`);
         } catch (e) {
-            setOutput(prev => prev + `>> ${command}\n[ERROR] ${e.message}\n\n`);
+            setOutput(prev => prev + `>> ${command}\n${t.console.error_prefix} ${e.message}\n\n`);
         } finally {
             setLoading(false);
         }
@@ -76,7 +76,7 @@ export function ConsolePanel({ apiKey, t }) {
             </div>
 
             <pre style={{ background: '#1e1e2e', color: '#cdd6f4', padding: 16, borderRadius: 7, minHeight: 220, fontFamily: 'monospace', fontSize: 13, overflowX: 'auto', whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
-                {output || '(output will appear here)'}
+                {output || t.console.placeholder}
             </pre>
         </div>
     );

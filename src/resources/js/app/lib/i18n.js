@@ -23,6 +23,15 @@ export const TRANSLATIONS = {
         tmax: 'Duration tmax (s)',
         header: {
             export_logs: 'Export logs',
+            api_key_placeholder: 'API key',
+        },
+        console: {
+            placeholder: '(output will appear here)',
+            error_prefix: '[ERROR]',
+        },
+        sim: {
+            empty_hint: 'Set parameters and press Run',
+            need_api_key: 'Set API key first',
         },
     },
     sk: {
@@ -49,6 +58,15 @@ export const TRANSLATIONS = {
         tmax: 'Trvanie tmax (s)',
         header: {
             export_logs: 'Exportovať logy',
+            api_key_placeholder: 'API kľúč',
+        },
+        console: {
+            placeholder: '(výstup sa zobrazí tu)',
+            error_prefix: '[CHYBA]',
+        },
+        sim: {
+            empty_hint: 'Nastavte parametre a stlačte Spustiť',
+            need_api_key: 'Najskôr nastavte API kľúč',
         },
     },
 };

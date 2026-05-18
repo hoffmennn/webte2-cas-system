@@ -86,7 +86,7 @@ export function SimPanel({ type, apiKey, t }) {
                     style={{ width: '100%', padding: '9px 0', background: loading || !apiKey ? '#9ca3af' : '#3b82f6', color: '#fff', border: 'none', borderRadius: 7, cursor: loading || !apiKey ? 'default' : 'pointer', fontWeight: 600, marginTop: 4 }}>
                     {loading ? t.loading : t.run}
                 </button>
-                {!apiKey && <p style={{ color: '#f59e0b', fontSize: 12, margin: '8px 0 0' }}>Set API key first.</p>}
+                {!apiKey && <p style={{ color: '#f59e0b', fontSize: 12, margin: '8px 0 0' }}>{t.sim.need_api_key}</p>}
                 {error && (
                     <div style={{ marginTop: 10, padding: 8, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 6, color: '#dc2626', fontSize: 12 }}>
                         {error}
@@ -134,7 +134,7 @@ export function SimPanel({ type, apiKey, t }) {
                 ) : (
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 320, border: '2px dashed #e5e7eb', borderRadius: 10, color: '#9ca3af', flexDirection: 'column', gap: 8 }}>
                         <span style={{ fontSize: 32 }}>▶</span>
-                        <span style={{ fontSize: 14 }}>Set parameters and click "{t.run}"</span>
+                        <span style={{ fontSize: 14 }}>{t.sim.empty_hint}</span>
                     </div>
                 )}
             </div>

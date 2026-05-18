@@ -13,7 +13,7 @@ export function Header({ lang, setLang, apiKey, keyStatus, onSaveApiKey, t }) {
             </h1>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <LangToggle lang={lang} setLang={setLang} />
-                <ApiKeyInput draft={draft} setDraft={setDraft} onSave={save} placeholder={t.apiKey} saveLabel={t.save} />
+                <ApiKeyInput draft={draft} setDraft={setDraft} onSave={save} placeholder={t.header.api_key_placeholder} saveLabel={t.save} />
                 <ExportLogsButton apiKey={apiKey} label={t.header.export_logs} />
                 <KeyStatusBadge status={keyStatus} t={t} />
             </div>
