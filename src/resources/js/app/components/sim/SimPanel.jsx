@@ -128,7 +128,7 @@ export function SimPanel({ type, apiKey, t }) {
                         </div>
 
                         <div style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, padding: '8px 8px 4px' }}>
-                            <LineChart data={frames} series={[...series].sort()} height={180} />
+                            <LineChart data={frames} series={[...series].sort()} height={180} idx={idx} />
                         </div>
                     </>
                 ) : (

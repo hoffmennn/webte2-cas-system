@@ -1,7 +1,7 @@
 import React from 'react';
 import { CHART_COLORS } from '../../lib/constants';
 
-export function LineChart({ data, series, height = 180 }) {
+export function LineChart({ data, series, height = 180, idx }) {
     if (!data || data.length < 2) return null;
 
     const W = 600, H = height;
@@ -20,6 +20,9 @@ export function LineChart({ data, series, height = 180 }) {
 
     const scaleX = v => pad.l + ((v - tMin) / tRange) * innerW;
     const scaleY = v => pad.t + (1 - (v - vMin) / vRange) * innerH;
+
+    const cursorRow = Number.isInteger(idx) ? data[Math.min(Math.max(idx, 0), data.length - 1)] : null;
+    const cursorX = cursorRow ? scaleX(cursorRow[0]) : null;
 
     const yTicks = 4;
     const xTicks = 5;
@@ -54,6 +57,10 @@ export function LineChart({ data, series, height = 180 }) {
                         stroke={CHART_COLORS[paletteIdx % CHART_COLORS.length]} strokeWidth="1.5" />
                 );
             })}
+            {cursorX !== null && (
+                <line x1={cursorX} x2={cursorX} y1={pad.t} y2={pad.t + innerH}
+                    stroke="#888" strokeOpacity="0.6" strokeWidth="1" />
+            )}
         </svg>
     );
 }
