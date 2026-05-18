@@ -10,18 +10,37 @@ import { DocsPanel } from './components/DocsPanel';
 
 const LANG_STORAGE_KEY = 'cas_lang';
 const SUPPORTED_LANGS = ['en', 'sk'];
+const TAB_KEYS = ['console', 'pendulum', 'ballbeam', 'stats', 'docs'];
+const DEFAULT_TAB = 'console';
+
+function tabFromHash() {
+    const hash = window.location.hash.replace(/^#/, '');
+    return TAB_KEYS.includes(hash) ? hash : DEFAULT_TAB;
+}
 
 export default function App() {
     const [lang, setLang] = useState(() => {
         const stored = localStorage.getItem(LANG_STORAGE_KEY);
         return SUPPORTED_LANGS.includes(stored) ? stored : 'en';
     });
-    const [activeTab, setActiveTab] = useState('console');
+    const [activeTab, setActiveTab] = useState(tabFromHash);
 
     useEffect(() => {
         localStorage.setItem(LANG_STORAGE_KEY, lang);
         document.documentElement.lang = lang;
     }, [lang]);
+
+    useEffect(() => {
+        if (window.location.hash.replace(/^#/, '') !== activeTab) {
+            window.history.replaceState(null, '', `#${activeTab}`);
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
+        const onHashChange = () => setActiveTab(tabFromHash());
+        window.addEventListener('hashchange', onHashChange);
+        return () => window.removeEventListener('hashchange', onHashChange);
+    }, []);
     const { apiKey, status: keyStatus, save: saveApiKey } = useApiKey();
 
     const t = TRANSLATIONS[lang];
