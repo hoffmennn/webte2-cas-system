@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AnimationController;
 use App\Http\Controllers\Api\ExecuteController;
+use App\Http\Controllers\Api\LogController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('api.key')->group(function () {
@@ -14,4 +15,7 @@ Route::middleware('api.key')->group(function () {
     // Animation simulations
     Route::post('/animate/inverted-pendulum', [AnimationController::class, 'invertedPendulum']);
     Route::post('/animate/ball-beam',         [AnimationController::class, 'ballBeam']);
+
+    // CSV export of request logs (REQ 9)
+    Route::get('/logs/export', [LogController::class, 'export']);
 });
