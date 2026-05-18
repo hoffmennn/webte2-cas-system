@@ -28,6 +28,12 @@ const TD_STYLE = {
 
 const SECTION_TITLE_STYLE = { margin: '16px 0 8px', fontSize: 14, fontWeight: 600, color: '#0f172a' };
 
+function animationLabel(type, t) {
+    if (type === 'inverted_pendulum') return t.pendulum;
+    if (type === 'ball_beam')         return t.ballBeam;
+    return type;
+}
+
 export function StatsPanel({ apiKey, t }) {
     const [data, setData] = useState(null);
     const [error, setError] = useState(null);
@@ -110,7 +116,7 @@ function SummaryTable({ rows, selectedType, onSelect, t }) {
                         <tr key={row.animation_type}
                             onClick={() => onSelect(active ? null : row.animation_type)}
                             style={{ cursor: 'pointer', background: active ? '#eff6ff' : 'transparent' }}>
-                            <td style={TD_STYLE}>{row.animation_type}</td>
+                            <td style={TD_STYLE}>{animationLabel(row.animation_type, t)}</td>
                             <td style={TD_STYLE}>{row.total_runs}</td>
                             <td style={TD_STYLE}>{row.unique_visitors}</td>
                             <td style={TD_STYLE}>{formatTimestamp(row.last_used_at)}</td>
@@ -136,7 +142,7 @@ function DetailsTable({ rows, t }) {
             <tbody>
                 {rows.map((row, i) => (
                     <tr key={i}>
-                        <td style={TD_STYLE}>{row.animation_type}</td>
+                        <td style={TD_STYLE}>{animationLabel(row.animation_type, t)}</td>
                         <td style={TD_STYLE}>{formatTimestamp(row.used_at)}</td>
                         <td style={TD_STYLE}>{row.city || '—'}</td>
                         <td style={TD_STYLE}>{row.country || '—'}</td>

@@ -1,7 +1,6 @@
 export const TRANSLATIONS = {
     en: {
         title: 'CAS Interface',
-        apiKey: 'API Key',
         save: 'Save',
         console: 'Console',
         pendulum: 'Inverted Pendulum',
@@ -25,7 +24,7 @@ export const TRANSLATIONS = {
             export_logs: 'Export logs',
             api_key_placeholder: 'API key',
         },
-        console: {
+        consolePanel: {
             placeholder: '(output will appear here)',
             error_prefix: '[ERROR]',
         },
@@ -52,7 +51,6 @@ export const TRANSLATIONS = {
     },
     sk: {
         title: 'CAS Rozhranie',
-        apiKey: 'API Kľúč',
         save: 'Uložiť',
         console: 'Konzola',
         pendulum: 'Invertné Kyvadlo',
@@ -76,7 +74,7 @@ export const TRANSLATIONS = {
             export_logs: 'Exportovať logy',
             api_key_placeholder: 'API kľúč',
         },
-        console: {
+        consolePanel: {
             placeholder: '(výstup sa zobrazí tu)',
             error_prefix: '[CHYBA]',
         },
