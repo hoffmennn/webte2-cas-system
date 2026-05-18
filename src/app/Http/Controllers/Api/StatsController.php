@@ -5,8 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\AnimationStat;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 
 class StatsController extends Controller
 {
@@ -20,7 +18,7 @@ class StatsController extends Controller
      * for the moment of use. The JSON response exposes these as
      * `unique_visitors` and `used_at` respectively (without leaking the token).
      */
-    public function index(Request $request): JsonResponse
+    public function index(): JsonResponse
     {
         return response()->json([
             'summary' => $this->summary(),
@@ -31,16 +29,16 @@ class StatsController extends Controller
     private function summary(): array
     {
         return AnimationStat::query()
-            ->selectRaw('animation_type, COUNT(*) AS total_runs, COUNT(DISTINCT cookie_token) AS unique_visitors, MAX(created_at) AS last_used_at')
+            ->get(['animation_type', 'cookie_token', 'created_at'])
             ->groupBy('animation_type')
-            ->orderBy('animation_type')
-            ->get()
-            ->map(fn ($row) => [
-                'animation_type'  => $row->animation_type,
-                'total_runs'      => (int) $row->total_runs,
-                'unique_visitors' => (int) $row->unique_visitors,
-                'last_used_at'    => $row->last_used_at ? Carbon::parse($row->last_used_at)->toIso8601String() : null,
+            ->map(fn ($rows, $type) => [
+                'animation_type'  => $type,
+                'total_runs'      => $rows->count(),
+                'unique_visitors' => $rows->pluck('cookie_token')->unique()->count(),
+                'last_used_at'    => $rows->pluck('created_at')->max()?->toIso8601String(),
             ])
+            ->sortKeys()
+            ->values()
             ->all();
     }
 
