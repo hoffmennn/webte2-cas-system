@@ -50,11 +50,11 @@ export function LineChart({ data, series, height = 180, idx }) {
                     </text>
                 );
             })}
-            {series.map((seriesIdx, paletteIdx) => {
+            {series.map(seriesIdx => {
                 const points = data.map(row => `${scaleX(row[0])},${scaleY(row[seriesIdx])}`).join(' L ');
                 return (
                     <path key={seriesIdx} d={`M ${points}`} fill="none"
-                        stroke={CHART_COLORS[paletteIdx % CHART_COLORS.length]} strokeWidth="1.5" />
+                        stroke={CHART_COLORS[(seriesIdx - 1) % CHART_COLORS.length]} strokeWidth="1.5" />
                 );
             })}
             {cursorX !== null && (
