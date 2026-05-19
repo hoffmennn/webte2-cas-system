@@ -2,11 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-
-
-
 use App\Http\Controllers\Api\Concerns\ResolvesApiKey;
-use App\Http\Controllers\Controller;
 use App\Models\OctaveSession;
 use App\Models\RequestLog;
 use App\Services\OctaveService;
@@ -14,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class ExecuteController extends Controller
+class ExecuteController
 {
     use ResolvesApiKey;
 

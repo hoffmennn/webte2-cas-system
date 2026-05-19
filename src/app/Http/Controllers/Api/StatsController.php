@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
 use App\Models\AnimationStat;
 use Illuminate\Http\JsonResponse;
 
-class StatsController extends Controller
+class StatsController
 {
     private const DETAILS_LIMIT = 100;
 
