@@ -20,10 +20,8 @@ info:
     - `?api_key=<key>` query string (last resort)
 
 servers:
-  - url: http://localhost:8080/api
-    description: Local development (Docker)
-  - url: https://node11.webte.fei.stuba.sk/api
-    description: School server
+  - url: /api
+    description: Current host (works for both local Docker and the school server)
 
 security:
   - apiKeyAuth: []
@@ -271,7 +269,12 @@ components:
           type: number
           minimum: -0.5
           maximum: 0.5
-          description: Initial angle [rad]
+          description: Initial pendulum angle disturbance [rad]
+        r_target:
+          type: number
+          minimum: -2
+          maximum: 2
+          description: Target cart position the LQR controller drives toward [m]
         dt:
           type: number
           minimum: 0.01
@@ -306,7 +309,12 @@ components:
           type: number
           minimum: -1
           maximum: 1
-          description: Initial ball position
+          description: Initial ball position [m]
+        r_target:
+          type: number
+          minimum: -1
+          maximum: 1
+          description: Target ball position the pole-placement controller drives toward [m]
         dt:
           type: number
           minimum: 0.01

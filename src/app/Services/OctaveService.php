@@ -42,22 +42,30 @@ class OctaveService
     }
 
     /**
-     * Simulate the inverted pendulum using a closed-loop LQR controller.
-     * Returns JSON array: [[t, x, x_dot, theta, theta_dot], ...]
+     * Simulate the inverted pendulum tracking a commanded cart position.
      *
-     * State: x = cart position, theta = pendulum angle from vertical (rad).
-     * Parameters match the CTMS inverted pendulum model.
+     * Mirrors the reference script `kyvadlo.txt` shipped with the assignment
+     * (CTMS Michigan inverted-pendulum state-space tutorial): LQR controller
+     * with Q = C'*C and R = 1, plus a pre-compensator `Npre` so the cart
+     * settles at the reference `r_target` instead of zero. The simulation
+     * itself is done by Octave's `lsim` — analytically exact for an LTI
+     * system, no Euler step error.
+     *
+     * State: [x; x_dot; theta; theta_dot] where x = cart position,
+     * theta = pendulum angle from vertical (rad). Returns JSON array
+     * [[t, x, x_dot, theta, theta_dot], ...].
      */
     public function computeInvertedPendulum(array $params): array
     {
-        $M      = (float) ($params['M']      ?? 0.5);
-        $m      = (float) ($params['m']      ?? 0.2);
-        $b      = (float) ($params['b']      ?? 0.1);
-        $Ival   = (float) ($params['I']      ?? 0.006);
-        $l      = (float) ($params['l']      ?? 0.3);
-        $theta0 = (float) ($params['theta0'] ?? 0.1);
-        $dt     = max(0.01, min(0.1,  (float) ($params['dt']   ?? 0.05)));
-        $tmax   = max(1.0,  min(20.0, (float) ($params['tmax'] ?? 5.0)));
+        $M       = (float) ($params['M']        ?? 0.5);
+        $m       = (float) ($params['m']        ?? 0.2);
+        $b       = (float) ($params['b']        ?? 0.1);
+        $Ival    = (float) ($params['I']        ?? 0.006);
+        $l       = (float) ($params['l']        ?? 0.3);
+        $theta0  = (float) ($params['theta0']   ?? 0.1);
+        $rTarget = (float) ($params['r_target'] ?? 0.2);
+        $dt      = max(0.01, min(0.1,  (float) ($params['dt']   ?? 0.05)));
+        $tmax    = max(1.0,  min(20.0, (float) ($params['tmax'] ?? 5.0)));
 
         $script = <<<OCTAVE
 more off;
@@ -70,23 +78,25 @@ A_ = [0 1 0 0; ...
       0 -(m_p*l_p*b_c)/p_ m_p*g_c*l_p*(M_c+m_p)/p_ 0];
 B_ = [0; (I_p+m_p*l_p^2)/p_; 0; m_p*l_p/p_];
 C_ = [1 0 0 0; 0 0 1 0];
-Q_ = C_'*C_;
-R_ = 0.001;
-K_ = lqr(A_, B_, Q_, R_);
+D_ = [0; 0];
+K_ = lqr(A_, B_, C_'*C_, 1);
 Ac = A_ - B_*K_;
+Npre = -inv(C_(1,:)*inv(Ac)*B_);
+sys_ = ss(Ac, B_*Npre, C_, D_);
+
+dt_={$dt}; tmax_={$tmax}; r_={$rTarget};
+t_ = (0:dt_:tmax_)';
 x0_ = [0; 0; {$theta0}; 0];
-dt_={$dt}; tmax_={$tmax};
-t_ = 0:dt_:tmax_;
-N_ = length(t_);
-xs_ = zeros(4, N_);
-xs_(:,1) = x0_;
-for ii=2:N_
-  xs_(:,ii) = xs_(:,ii-1) + dt_*(Ac*xs_(:,ii-1));
-end
+u_ = r_*ones(size(t_));
+
+[~, ~, xs_] = lsim(sys_, u_, t_, x0_);
+xs_ = xs_';
+
+Nlen = length(t_);
 printf('[');
-for ii=1:N_
+for ii=1:Nlen
   printf('[%.6f,%.6f,%.6f,%.6f,%.6f]', t_(ii), xs_(1,ii), xs_(2,ii), xs_(3,ii), xs_(4,ii));
-  if ii < N_; printf(','); end;
+  if ii < Nlen; printf(','); end;
 end
 printf(']');
 OCTAVE;
@@ -97,21 +107,26 @@ OCTAVE;
     }
 
     /**
-     * Simulate the ball-on-beam system using a closed-loop LQR controller.
-     * Returns JSON array: [[t, r, r_dot, alpha, alpha_dot], ...]
+     * Simulate the ball-on-beam system tracking a commanded ball position.
      *
-     * State: r = ball position (m), alpha = beam angle (rad).
-     * Linearized model and H coefficient follow the reference Octave script
-     * (workspace root `gulicka.txt`): H = -m*g/(J/R^2 + m), with g = -9.8.
+     * Mirrors the reference script `gulicka.txt` shipped with the assignment
+     * (CTMS Michigan ball-beam state-space tutorial): pole placement at
+     * [-2±2i, -20, -80] plus a pre-compensator `Npre` so the ball settles at
+     * the reference `r_target` instead of zero. `lsim` does the simulation.
+     *
+     * State: [r; r_dot; alpha; alpha_dot] where r = ball position (m),
+     * alpha = beam angle (rad). Returns JSON array
+     * [[t, r, r_dot, alpha, alpha_dot], ...].
      */
     public function computeBallBeam(array $params): array
     {
-        $m     = (float) ($params['m']    ?? 0.111);
-        $R     = (float) ($params['R']    ?? 0.015);
-        $Jval  = (float) ($params['J']    ?? 9.99e-6);
-        $r0    = (float) ($params['r0']   ?? 0.0);
-        $dt    = max(0.01, min(0.1,  (float) ($params['dt']   ?? 0.05)));
-        $tmax  = max(1.0,  min(20.0, (float) ($params['tmax'] ?? 5.0)));
+        $m       = (float) ($params['m']        ?? 0.111);
+        $R       = (float) ($params['R']        ?? 0.015);
+        $Jval    = (float) ($params['J']        ?? 9.99e-6);
+        $r0      = (float) ($params['r0']       ?? 0.0);
+        $rTarget = (float) ($params['r_target'] ?? 0.25);
+        $dt      = max(0.01, min(0.1,  (float) ($params['dt']   ?? 0.05)));
+        $tmax    = max(1.0,  min(20.0, (float) ($params['tmax'] ?? 5.0)));
 
         $script = <<<OCTAVE
 more off;
@@ -120,24 +135,26 @@ m_b={$m}; R_b={$R}; g_b=-9.8; J_b={$Jval};
 H_ = -m_b*g_b/(J_b/(R_b^2)+m_b);
 A_ = [0 1 0 0; 0 0 H_ 0; 0 0 0 1; 0 0 0 0];
 B_ = [0; 0; 0; 1];
-C_ = [1 0 0 0; 0 0 1 0];
-Q_ = C_'*C_;
-R_ = 0.01;
-K_ = lqr(A_, B_, Q_, R_);
+C_ = [1 0 0 0];
+D_ = 0;
+K_ = place(A_, B_, [-2+2i, -2-2i, -20, -80]);
 Ac = A_ - B_*K_;
+Npre = -inv(C_*inv(Ac)*B_);
+sys_ = ss(Ac, B_, C_, D_);
+
+dt_={$dt}; tmax_={$tmax}; r_={$rTarget};
+t_ = (0:dt_:tmax_)';
 x0_ = [{$r0}; 0; 0; 0];
-dt_={$dt}; tmax_={$tmax};
-t_ = 0:dt_:tmax_;
-N_ = length(t_);
-xs_ = zeros(4, N_);
-xs_(:,1) = x0_;
-for ii=2:N_
-  xs_(:,ii) = xs_(:,ii-1) + dt_*(Ac*xs_(:,ii-1));
-end
+u_ = Npre*r_*ones(size(t_));
+
+[~, ~, xs_] = lsim(sys_, u_, t_, x0_);
+xs_ = xs_';
+
+Nlen = length(t_);
 printf('[');
-for ii=1:N_
+for ii=1:Nlen
   printf('[%.6f,%.6f,%.6f,%.6f,%.6f]', t_(ii), xs_(1,ii), xs_(2,ii), xs_(3,ii), xs_(4,ii));
-  if ii < N_; printf(','); end;
+  if ii < Nlen; printf(','); end;
 end
 printf(']');
 OCTAVE;

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Api\Concerns\ResolvesApiKey;
-use App\Http\Controllers\Controller;
 use App\Models\AnimationStat;
 use App\Models\RequestLog;
 use App\Services\OctaveService;
@@ -11,7 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
-class AnimationController extends Controller
+class AnimationController
 {
     use ResolvesApiKey;
 
@@ -22,19 +21,20 @@ class AnimationController extends Controller
 
     /**
      * POST /api/animate/inverted-pendulum
-     * Accepted params: M, m, b, I, l, theta0, dt, tmax
+     * Accepted params: M, m, b, I, l, theta0, r_target, dt, tmax
      */
     public function invertedPendulum(Request $request): JsonResponse
     {
         $params = $request->validate([
-            'M'      => 'nullable|numeric|min:0.1|max:10',
-            'm'      => 'nullable|numeric|min:0.01|max:5',
-            'b'      => 'nullable|numeric|min:0|max:10',
-            'I'      => 'nullable|numeric|min:0.001|max:1',
-            'l'      => 'nullable|numeric|min:0.05|max:2',
-            'theta0' => 'nullable|numeric|min:-0.5|max:0.5',
-            'dt'     => 'nullable|numeric|min:0.01|max:0.1',
-            'tmax'   => 'nullable|numeric|min:1|max:20',
+            'M'        => 'nullable|numeric|min:0.1|max:10',
+            'm'        => 'nullable|numeric|min:0.01|max:5',
+            'b'        => 'nullable|numeric|min:0|max:10',
+            'I'        => 'nullable|numeric|min:0.001|max:1',
+            'l'        => 'nullable|numeric|min:0.05|max:2',
+            'theta0'   => 'nullable|numeric|min:-1|max:1',
+            'r_target' => 'nullable|numeric|min:-2|max:2',
+            'dt'       => 'nullable|numeric|min:0.01|max:0.1',
+            'tmax'     => 'nullable|numeric|min:1|max:20',
         ]);
 
         $visitorToken = $this->resolveVisitorToken($request);
@@ -50,17 +50,18 @@ class AnimationController extends Controller
 
     /**
      * POST /api/animate/ball-beam
-     * Accepted params: m, R, J, r0, dt, tmax
+     * Accepted params: m, R, J, r0, r_target, dt, tmax
      */
     public function ballBeam(Request $request): JsonResponse
     {
         $params = $request->validate([
-            'm'    => 'nullable|numeric|min:0.001|max:5',
-            'R'    => 'nullable|numeric|min:0.001|max:0.5',
-            'J'    => 'nullable|numeric|min:1.0e-9|max:0.01',
-            'r0'   => 'nullable|numeric|min:-1|max:1',
-            'dt'   => 'nullable|numeric|min:0.01|max:0.1',
-            'tmax' => 'nullable|numeric|min:1|max:20',
+            'm'        => 'nullable|numeric|min:0.001|max:5',
+            'R'        => 'nullable|numeric|min:0.001|max:0.5',
+            'J'        => 'nullable|numeric|min:1.0e-9|max:0.01',
+            'r0'       => 'nullable|numeric|min:-1|max:1',
+            'r_target' => 'nullable|numeric|min:-1|max:1',
+            'dt'       => 'nullable|numeric|min:0.01|max:0.1',
+            'tmax'     => 'nullable|numeric|min:1|max:20',
         ]);
 
         $visitorToken = $this->resolveVisitorToken($request);

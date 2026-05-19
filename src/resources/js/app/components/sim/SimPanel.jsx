@@ -6,23 +6,25 @@ import { PendulumCanvas } from './PendulumCanvas';
 import { BallBeamCanvas } from './BallBeamCanvas';
 
 const PENDULUM_PARAMS = [
-    { key: 'M',      label: 'Cart mass M (kg)',       default: 0.5,   step: 0.1 },
-    { key: 'm',      label: 'Pendulum mass m (kg)',   default: 0.2,   step: 0.05 },
-    { key: 'b',      label: 'Friction b',             default: 0.1,   step: 0.01 },
-    { key: 'I',      label: 'Inertia I',              default: 0.006, step: 0.001 },
-    { key: 'l',      label: 'Rod length l (m)',       default: 0.3,   step: 0.05 },
-    { key: 'theta0', label: 'Initial angle θ₀ (rad)', default: 0.1,   step: 0.01 },
-    { key: 'dt',     label: 'Time step dt (s)',       default: 0.05,  step: 0.01 },
-    { key: 'tmax',   label: 'Duration tmax (s)',      default: 5,     step: 1 },
+    { key: 'M',        label: 'Cart mass M (kg)',          default: 0.5,   step: 0.1 },
+    { key: 'm',        label: 'Pendulum mass m (kg)',      default: 0.2,   step: 0.05 },
+    { key: 'b',        label: 'Friction b',                default: 0.1,   step: 0.01 },
+    { key: 'I',        label: 'Inertia I',                 default: 0.006, step: 0.001 },
+    { key: 'l',        label: 'Rod length l (m)',          default: 0.3,   step: 0.05 },
+    { key: 'theta0',   label: 'Initial angle θ₀ (rad)',    default: 0.1,   step: 0.01 },
+    { key: 'r_target', label: 'Target cart position r (m)', default: 0.2,  step: 0.05 },
+    { key: 'dt',       label: 'Time step dt (s)',          default: 0.05,  step: 0.01 },
+    { key: 'tmax',     label: 'Duration tmax (s)',         default: 5,     step: 1 },
 ];
 
 const BALLBEAM_PARAMS = [
-    { key: 'm',    label: 'Ball mass m (kg)',        default: 0.111,   step: 0.01 },
-    { key: 'R',    label: 'Ball radius R (m)',       default: 0.015,   step: 0.001 },
-    { key: 'J',    label: 'Inertia J',               default: 9.99e-6, step: 1e-6 },
-    { key: 'r0',   label: 'Initial position r₀ (m)', default: 0.0,     step: 0.05 },
-    { key: 'dt',   label: 'Time step dt (s)',        default: 0.05,    step: 0.01 },
-    { key: 'tmax', label: 'Duration tmax (s)',       default: 5,       step: 1 },
+    { key: 'm',        label: 'Ball mass m (kg)',          default: 0.111,   step: 0.01 },
+    { key: 'R',        label: 'Ball radius R (m)',         default: 0.015,   step: 0.001 },
+    { key: 'J',        label: 'Inertia J',                 default: 9.99e-6, step: 1e-6 },
+    { key: 'r0',       label: 'Initial position r₀ (m)',   default: 0.0,     step: 0.05 },
+    { key: 'r_target', label: 'Target ball position r (m)', default: 0.25,   step: 0.05 },
+    { key: 'dt',       label: 'Time step dt (s)',          default: 0.05,    step: 0.01 },
+    { key: 'tmax',     label: 'Duration tmax (s)',         default: 5,       step: 1 },
 ];
 
 const PARAM_DEFS = {
@@ -41,21 +43,46 @@ export function SimPanel({ type, apiKey, t }) {
     const [series, setSeries] = useState([1, 3]);
     const { idx, setIdx, playing, setPlaying } = usePlayer(frames);
 
+    // CTMS state-space convention has +angle = CCW (lean LEFT / beam left
+    // side down). Visually users expect + = right. We flip the angle
+    // column (index 3 = θ or α, index 4 = its derivative) on both ways
+    // through the API so the displayed angle matches the entered one.
+    const flipAngle = row => {
+        const r = [...row];
+        r[3] = -r[3];
+        r[4] = -r[4];
+        return r;
+    };
+
     const run = async () => {
         if (!apiKey) return;
         setLoading(true);
         setError(null);
         try {
+            // Inputs hold raw strings so users can backspace to empty; coerce here.
+            const apiParams = Object.fromEntries(
+                Object.entries(params).map(([k, v]) => {
+                    const n = parseFloat(v);
+                    return [k, Number.isFinite(n) ? n : 0];
+                })
+            );
+            if (type === 'inverted-pendulum' && apiParams.theta0 !== undefined) {
+                apiParams.theta0 = -apiParams.theta0;
+            }
             const res = await fetch(`${API_BASE}/animate/${type}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
-                body: JSON.stringify(params),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-API-Key': apiKey,
+                },
+                body: JSON.stringify(apiParams),
             });
             const json = await res.json();
             if (!res.ok || !json.success) {
-                setError(json.error || json.details || `HTTP ${res.status}`);
+                setError(json.error || json.message || json.details || `HTTP ${res.status}`);
             } else {
-                setFrames(json.data);
+                setFrames(json.data.map(flipAngle));
             }
         } catch (e) {
             setError(e.message);
@@ -77,7 +104,7 @@ export function SimPanel({ type, apiKey, t }) {
                     <div key={p.key} className="mb-2.5">
                         <label className="block text-[11px] text-gray-500 mb-[3px]">{p.label}</label>
                         <input type="number" value={params[p.key]} step={p.step}
-                            onChange={e => setParams(prev => ({ ...prev, [p.key]: parseFloat(e.target.value) || 0 }))}
+                            onChange={e => setParams(prev => ({ ...prev, [p.key]: e.target.value }))}
                             className="w-full py-[5px] px-2 border border-gray-300 rounded-[5px] text-[13px] box-border" />
                     </div>
                 ))}
