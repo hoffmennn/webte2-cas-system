@@ -17,7 +17,10 @@ export function useApiKey() {
         setStatus('checking');
         const controller = new AbortController();
         fetch(`${API_BASE}/ping`, {
-            headers: { 'X-API-Key': apiKey },
+            headers: {
+                'Accept': 'application/json',
+                'X-API-Key': apiKey,
+            },
             signal: controller.signal,
         })
             .then(res => setStatus(res.ok ? 'valid' : 'invalid'))

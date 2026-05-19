@@ -13,7 +13,11 @@ export function ConsolePanel({ apiKey, t }) {
         try {
             const res = await fetch(`${API_BASE}/execute`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'X-API-Key': apiKey },
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-API-Key': apiKey,
+                },
                 body: JSON.stringify({ command, session_token: session || undefined }),
             });
             const json = await res.json();
