@@ -18,11 +18,4 @@ class OctaveSession extends Model
             ['last_used_at' => Carbon::now()]
         );
     }
-
-    public function getMatFilePath(): string
-    {
-        $safe = preg_replace('/[^a-zA-Z0-9]/', '', $this->session_token);
-
-        return config('cas.session_dir', '/tmp') . '/cas_sess_' . $safe . '.mat';
-    }
 }
