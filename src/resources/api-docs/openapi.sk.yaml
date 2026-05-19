@@ -1,0 +1,371 @@
+openapi: 3.0.3
+
+info:
+  title: WEBTE2 CAS API
+  version: 1.0.0
+  description: |
+    REST API pre projekt CAS (Computer Aided System). Backend obaľuje
+    lokálnu inštaláciu GNU Octave a sprístupňuje:
+
+    - **Konzolu** – spúšťanie ľubovoľných príkazov Octave s perzistentným workspace
+    - **Animácie** – simulácie LQR pre invertné kyvadlo a guličku na tyči
+    - **Export logov** – CSV výpis všetkých záznamov `request_logs`
+    - **Štatistiku** – použitie jednotlivých animácií s priradením mesta/krajiny
+
+    Všetky cesty pod `/api` vyžadujú platný API kľúč. Kľúč je možné zadať
+    tromi spôsobmi:
+
+    - hlavička `X-API-Key: <key>` (preferované)
+    - hlavička `Authorization: Bearer <key>`
+    - query parameter `?api_key=<key>` (núdzové riešenie)
+
+servers:
+  - url: /api
+    description: Aktuálny host (funguje pre lokálny Docker aj školský server)
+
+security:
+  - apiKeyAuth: []
+
+tags:
+  - name: System
+    description: Pomocníci na overenie dostupnosti a autentifikácie.
+  - name: CAS
+    description: Spúšťanie príkazov Octave a simulácie.
+  - name: Observability
+    description: Export logov a štatistika použitia.
+
+paths:
+  /ping:
+    get:
+      tags: [System]
+      summary: Overenie API kľúča / kontrola dostupnosti
+      description: |
+        Vracia `{ok: true}` s HTTP 200, ak je API kľúč platný. Frontend
+        toto volanie používa na riadenie zelenej / červenej kontrolky
+        v hlavičke. Endpoint NEZAPISUJE do `request_logs`, takže je
+        bezpečné volať ho často.
+      responses:
+        '200':
+          description: API kľúč je platný.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PingResponse' }
+        '401':
+          description: Chýbajúci alebo neplatný API kľúč.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /execute:
+    post:
+      tags: [CAS]
+      summary: Spustenie príkazu Octave v perzistentnej relácii
+      description: |
+        Vykoná zadaný príkaz Octave. Premenné definované v predchádzajúcich
+        volaniach sa obnovia, ak sa pošle ten istý `session_token`, takže
+        sekvencia `a = 1 + 1` a následne `a + 2` funguje naprieč volaniami.
+        Ak `session_token` nie je uvedený, vytvorí sa nová relácia a jej
+        token sa vráti v odpovedi.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ExecuteRequest' }
+      responses:
+        '200':
+          description: Príkaz bol úspešne vykonaný.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecuteResponse' }
+        '422':
+          description: |
+            Octave nahlásil chybu (syntaktická chyba, nedefinovaná premenná,
+            atď.). Tvar odpovede je rovnaký, no `success=false` a `error`
+            obsahuje hlášku.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ExecuteResponse' }
+
+  /animate/inverted-pendulum:
+    post:
+      tags: [CAS]
+      summary: LQR simulácia invertného kyvadla
+      description: |
+        Spustí uzavretú LQR simuláciu invertného kyvadla (CTMS referencia
+        je v zadaní). Spomalenie na strane servera cez `usleep` je riadené
+        konštantou `CAS_SLOWDOWN_COEFFICIENT`. Ak ešte neexistuje, nastaví
+        cookie `cas_visitor`, ktorá riadi 10-minútový cooldown pre štatistiku.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/InvertedPendulumRequest' }
+      responses:
+        '200':
+          description: Snímky boli vypočítané.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnimationResponse' }
+        '500':
+          description: Výpočet v Octave zlyhal.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /animate/ball-beam:
+    post:
+      tags: [CAS]
+      summary: LQR simulácia guličky na tyči
+      description: |
+        Spustí uzavretú LQR simuláciu sústavy gulička na tyči. Správanie
+        cookie / spomalenia / štatistiky zodpovedá endpointu pre kyvadlo.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BallBeamRequest' }
+      responses:
+        '200':
+          description: Snímky boli vypočítané.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AnimationResponse' }
+        '500':
+          description: Výpočet v Octave zlyhal.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /logs/export:
+    get:
+      tags: [Observability]
+      summary: Export logov požiadaviek vo formáte CSV
+      description: |
+        Streamuje každý riadok tabuľky `request_logs` ako CSV na stiahnutie.
+        Celý API kľúč nie je nikdy zverejnený — v stĺpci `api_key_tail` sa
+        zobrazia len posledné 4 znaky. Stĺpec `output_truncated` je orezaný
+        na maximálne 500 znakov.
+      responses:
+        '200':
+          description: CSV súbor (príloha).
+          content:
+            text/csv:
+              schema:
+                type: string
+                format: binary
+
+  /stats:
+    get:
+      tags: [Observability]
+      summary: Agregovaná štatistika použitia animácií
+      description: |
+        Vracia súhrnné totály pre jednotlivé animácie v poli `summary` plus
+        100 najnovších záznamov použitia s priradením mesta/krajiny v poli
+        `details`. Každý záznam podlieha 10-minútovému cooldownu na návštevníka
+        (konfigurovateľné cez `CAS_STAT_COOLDOWN_MINUTES`).
+      responses:
+        '200':
+          description: Údaje štatistiky.
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/StatsResponse' }
+
+components:
+  securitySchemes:
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        Predvolená autentifikácia pomocou hlavičky. Middleware akceptuje
+        aj `Authorization: Bearer <key>` a `?api_key=<key>`.
+
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Zrozumiteľná chybová hláška.
+        details:
+          type: string
+          nullable: true
+          description: Voliteľný dodatočný kontext (napr. stderr z Octave).
+      required: [error]
+
+    PingResponse:
+      type: object
+      properties:
+        ok: { type: boolean }
+      required: [ok]
+
+    ExecuteRequest:
+      type: object
+      properties:
+        command:
+          type: string
+          maxLength: 10000
+          description: Surový príkaz Octave (môže obsahovať nové riadky).
+          example: a = 1 + 1
+        session_token:
+          type: string
+          maxLength: 64
+          nullable: true
+          description: |
+            Token vrátený z predchádzajúceho volania `/execute`. Obnoví
+            premenné workspace z tejto relácie. Ak nie je uvedený, vytvorí
+            sa nová relácia; jej token sa vráti v odpovedi.
+      required: [command]
+
+    ExecuteResponse:
+      type: object
+      properties:
+        output:
+          type: string
+          description: stdout z Octave (čo príkaz vypísal).
+        error:
+          type: string
+          nullable: true
+          description: stderr z Octave / chybová hláška, `null` pri úspechu.
+        success:
+          type: boolean
+        session_token:
+          type: string
+          description: Uchovajte medzi volaniami, aby premenné workspace prežili.
+      required: [output, success, session_token]
+
+    InvertedPendulumRequest:
+      type: object
+      description: |
+        Všetky parametre sú voliteľné; backend doplní rozumné predvolené
+        hodnoty zodpovedajúce CTMS referencii zo zadania.
+      properties:
+        M:
+          type: number
+          minimum: 0.1
+          maximum: 10
+          description: Hmotnosť vozíka [kg]
+        m:
+          type: number
+          minimum: 0.01
+          maximum: 5
+          description: Hmotnosť kyvadla [kg]
+        b:
+          type: number
+          minimum: 0
+          maximum: 10
+          description: Trenie vozíka
+        I:
+          type: number
+          minimum: 0.001
+          maximum: 1
+          description: Moment zotrvačnosti tyče
+        l:
+          type: number
+          minimum: 0.05
+          maximum: 2
+          description: Dĺžka tyče [m]
+        theta0:
+          type: number
+          minimum: -0.5
+          maximum: 0.5
+          description: Počiatočné vychýlenie uhla kyvadla [rad]
+        r_target:
+          type: number
+          minimum: -2
+          maximum: 2
+          description: Cieľová pozícia vozíka, ku ktorej LQR regulátor mieri [m]
+        dt:
+          type: number
+          minimum: 0.01
+          maximum: 0.1
+          description: Časový krok [s]
+        tmax:
+          type: number
+          minimum: 1
+          maximum: 20
+          description: Dĺžka simulácie [s]
+
+    BallBeamRequest:
+      type: object
+      description: Všetky parametre sú voliteľné; backend doplní predvolené hodnoty.
+      properties:
+        m:
+          type: number
+          minimum: 0.001
+          maximum: 5
+          description: Hmotnosť guličky [kg]
+        R:
+          type: number
+          minimum: 0.001
+          maximum: 0.5
+          description: Polomer guličky [m]
+        J:
+          type: number
+          minimum: 1.0e-9
+          maximum: 0.01
+          description: Moment zotrvačnosti
+        r0:
+          type: number
+          minimum: -1
+          maximum: 1
+          description: Počiatočná poloha guličky [m]
+        r_target:
+          type: number
+          minimum: -1
+          maximum: 1
+          description: Cieľová poloha guličky, ku ktorej regulátor mieri [m]
+        dt:
+          type: number
+          minimum: 0.01
+          maximum: 0.1
+          description: Časový krok [s]
+        tmax:
+          type: number
+          minimum: 1
+          maximum: 20
+          description: Dĺžka simulácie [s]
+
+    AnimationResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          description: Snímky ako riadky. Každý riadok je `[t, ...stavové_premenné]`.
+          items:
+            type: array
+            items: { type: number }
+        columns:
+          type: array
+          items: { type: string }
+          description: Popisy stĺpcov pre každý riadok poľa `data`.
+        success:
+          type: boolean
+      required: [data, columns, success]
+
+    StatsResponse:
+      type: object
+      properties:
+        summary:
+          type: array
+          items: { $ref: '#/components/schemas/StatsSummaryRow' }
+        details:
+          type: array
+          items: { $ref: '#/components/schemas/StatsDetailRow' }
+      required: [summary, details]
+
+    StatsSummaryRow:
+      type: object
+      properties:
+        animation_type:  { type: string, example: inverted_pendulum }
+        total_runs:      { type: integer }
+        unique_visitors: { type: integer }
+        last_used_at:    { type: string, format: date-time, nullable: true }
+
+    StatsDetailRow:
+      type: object
+      properties:
+        animation_type: { type: string }
+        used_at:        { type: string, format: date-time, nullable: true }
+        city:           { type: string, nullable: true }
+        country:        { type: string, nullable: true }

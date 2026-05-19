@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ $lang }}">
 <head>
     <meta charset="utf-8">
     <title>{{ $spec['info']['title'] }} – v{{ $spec['info']['version'] }}</title>
@@ -32,25 +32,25 @@
 <header class="cover">
     <h1>{{ $spec['info']['title'] }}</h1>
     <div class="meta">
-        Version {{ $spec['info']['version'] }}
+        {{ $labels['version'] }} {{ $spec['info']['version'] }}
         &nbsp;·&nbsp;
-        Generated {{ now()->format('Y-m-d H:i') }}
+        {{ $labels['generated'] }} {{ now()->format('Y-m-d H:i') }}
     </div>
     <p class="desc">{!! nl2br(e(trim($spec['info']['description']))) !!}</p>
 
-    <h3>Servers</h3>
+    <h3>{{ $labels['servers'] }}</h3>
     <ul>
         @foreach ($spec['servers'] as $server)
             <li><code>{{ $server['url'] }}</code> — <span class="desc">{{ $server['description'] }}</span></li>
         @endforeach
     </ul>
 
-    <h3>Authentication</h3>
+    <h3>{{ $labels['auth'] }}</h3>
     @php $auth = $spec['components']['securitySchemes']['apiKeyAuth'] ?? null; @endphp
     <p>
-        Type: <code>{{ $auth['type'] ?? '' }}</code>
-        in <code>{{ $auth['in'] ?? '' }}</code>
-        named <code>{{ $auth['name'] ?? '' }}</code>.
+        {{ $labels['auth_type'] }} <code>{{ $auth['type'] ?? '' }}</code>
+        {{ $labels['auth_in'] }} <code>{{ $auth['in'] ?? '' }}</code>
+        {{ $labels['auth_named'] }} <code>{{ $auth['name'] ?? '' }}</code>.
     </p>
     @if (!empty($auth['description']))
         <p class="desc">{!! nl2br(e(trim($auth['description']))) !!}</p>
@@ -81,13 +81,18 @@
         @endphp
 
         @if ($bodySchema && !empty($bodySchema['properties']))
-            <h3>Request body</h3>
+            <h3>{{ $labels['request_body'] }}</h3>
             @if (!empty($bodySchema['description']))
                 <p class="small">{{ trim($bodySchema['description']) }}</p>
             @endif
             <table>
                 <thead>
-                    <tr><th>Field</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+                    <tr>
+                        <th>{{ $labels['col_field'] }}</th>
+                        <th>{{ $labels['col_type'] }}</th>
+                        <th>{{ $labels['col_constr'] }}</th>
+                        <th>{{ $labels['col_desc'] }}</th>
+                    </tr>
                 </thead>
                 <tbody>
                     @foreach ($bodySchema['properties'] as $name => $prop)
@@ -111,10 +116,14 @@
             </table>
         @endif
 
-        <h3>Responses</h3>
+        <h3>{{ $labels['responses'] }}</h3>
         <table>
             <thead>
-                <tr><th>Status</th><th>Description</th><th>Content type</th></tr>
+                <tr>
+                    <th>{{ $labels['col_status'] }}</th>
+                    <th>{{ $labels['col_desc'] }}</th>
+                    <th>{{ $labels['col_content'] }}</th>
+                </tr>
             </thead>
             <tbody>
                 @foreach ($op['responses'] as $status => $response)
@@ -134,8 +143,7 @@
 @endforeach
 
 <p class="small" style="margin-top: 24px;">
-    Generated dynamically from <code>resources/api-docs/openapi.yaml</code>.
-    Any change to that file is reflected in the next PDF render.
+    {{ $labels['footer_note'] }}
 </p>
 
 {{-- dompdf script hook: stamps "Page X / Y" in the footer of every page --}}
@@ -144,12 +152,13 @@
         $font  = $fontMetrics->getFont('DejaVu Sans', 'normal');
         $size  = 9;
         $title = "{{ addslashes($spec['info']['title']) }} v{{ $spec['info']['version'] }}";
+        $pageLabel = "{{ addslashes($labels['page']) }}";
 
         // top-left header
         $pdf->page_text(40, 30, $title, $font, $size, [0.45, 0.45, 0.45]);
 
-        // bottom-right "Page X / Y"
-        $text  = "Page {PAGE_NUM} / {PAGE_COUNT}";
+        // bottom-right "Page X / Y" (localized)
+        $text  = $pageLabel . " {PAGE_NUM} / {PAGE_COUNT}";
         $width = $fontMetrics->getTextWidth($text, $font, $size);
         $x     = $pdf->get_width() - $width - 40;
         $y     = $pdf->get_height() - 30;

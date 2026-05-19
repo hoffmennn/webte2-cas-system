@@ -14,3 +14,22 @@
     0%, 100% { opacity: 1; }
     50%      { opacity: 0.35; }
 }
+
+/* Swagger UI: hide the raw spec-source URL shown under the API title — it
+   exposes the internal ?lang= query string and isn't useful to readers. */
+.swagger-ui .info .link,
+.swagger-ui .info hgroup.main a,
+.swagger-ui .info .main .url {
+    display: none !important;
+}
+
+/* Swagger UI: hide the single-entry Servers dropdown. The base URL (`/api`)
+   is still used silently for Try-it-out — there's just no UI element to
+   stare at. The Authorize button (in the same container) stays visible. */
+.swagger-ui .schemes-server-container,
+.swagger-ui .scheme-container .servers,
+.swagger-ui .scheme-container .servers-title,
+.swagger-ui .scheme-container .schemes > label,
+.swagger-ui .scheme-container select[aria-label*="Server" i] {
+    display: none !important;
+}
