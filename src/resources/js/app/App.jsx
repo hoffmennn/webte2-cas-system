@@ -55,15 +55,21 @@ export default function App() {
 
     return (
         <div className="min-h-screen bg-slate-100 font-sans">
-            <Header lang={lang} setLang={setLang} apiKey={apiKey} keyStatus={keyStatus} onSaveApiKey={saveApiKey} t={t} />
-            <TabBar tabs={tabs} active={activeTab} onSelect={setActiveTab} />
+            <Header
+                lang={lang} setLang={setLang}
+                apiKey={apiKey} keyStatus={keyStatus} onSaveApiKey={saveApiKey}
+                t={t}
+                tabs={tabs} activeTab={activeTab} onTabSelect={setActiveTab} />
+            <div className="hidden md:block">
+                <TabBar tabs={tabs} active={activeTab} onSelect={setActiveTab} />
+            </div>
 
             <main className="max-w-[1200px] mx-auto p-4 md:p-7">
                 {activeTab === 'console'  && <ConsolePanel apiKey={apiKey} t={t} />}
                 {activeTab === 'pendulum' && <SimPanel type="inverted-pendulum" apiKey={apiKey} t={t} />}
                 {activeTab === 'ballbeam' && <SimPanel type="ball-beam"         apiKey={apiKey} t={t} />}
                 {activeTab === 'stats'    && <StatsPanel apiKey={apiKey} t={t} />}
-                {activeTab === 'docs'     && <DocsPanel t={t} />}
+                {activeTab === 'docs'     && <DocsPanel t={t} lang={lang} />}
             </main>
         </div>
     );
