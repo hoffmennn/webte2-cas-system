@@ -28,7 +28,7 @@ class OctaveService
         $script = "more off;\n";
         if (file_exists($matFile) && filesize($matFile) > 0) {
             $escaped = addslashes($matFile);
-            $script .= "load('{$escaped}');\n";
+            $script .= "try; load('{$escaped}'); catch _e; end;\n";
         }
         $script .= $command . "\n";
         // Remove 'ans' so it does not pollute the saved workspace

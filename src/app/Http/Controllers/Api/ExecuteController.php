@@ -30,17 +30,17 @@ class ExecuteController
 
         $result = $this->octave->execute($command, $sessionToken);
 
+        $cleanError = OctaveService::filterStderr($result['error'] ?? '');
+
         RequestLog::create([
             'api_key'       => $this->resolveApiKey($request),
             'session_token' => $sessionToken,
             'endpoint'      => 'execute',
             'command'       => $command,
-            'output'        => trim($result['output'] . ($result['error'] ? "\n[stderr] " . $result['error'] : '')),
+            'output'        => trim($result['output'] . ($cleanError ? "\n[stderr] " . $cleanError : '')),
             'is_error'      => ! $result['success'],
             'ip_address'    => $request->ip(),
         ]);
-
-        $cleanError = OctaveService::filterStderr($result['error'] ?? '');
 
         return response()->json([
             'output'        => $result['output'],
