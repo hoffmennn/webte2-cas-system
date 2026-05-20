@@ -1,4 +1,5 @@
-export const API_BASE = import.meta.env.BASE_URL + 'api';
+const base = (import.meta.env.VITE_BASE_PATH || '/').replace(/\/$/, '');
+export const API_BASE = base + '/api';
 
 export const CHART_COLORS = ['#3b82f6', '#ef4444', '#22c55e', '#f59e0b'];
 
