@@ -12,6 +12,9 @@ export default defineConfig({
         react(),
         tailwindcss(),
     ],
+    optimizeDeps: {
+        include: ['react-simple-code-editor'],
+    },
     server: {
         host: 'localhost',
         watch: {

@@ -7,8 +7,10 @@
         "dev": "vite"
     },
     "dependencies": {
+        "prismjs": "^1.30.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
+        "react-simple-code-editor": "^0.14.1",
         "swagger-ui-react": "^5.32.6"
     },
     "devDependencies": {

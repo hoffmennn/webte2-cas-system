@@ -1,4 +1,9 @@
 import React, { useState } from 'react';
+import _Editor from 'react-simple-code-editor';
+const Editor = _Editor.default || _Editor;
+import Prism from 'prismjs';
+import 'prismjs/components/prism-matlab';
+import 'prismjs/themes/prism-tomorrow.css';
 import { API_BASE, STORAGE_KEYS } from '../lib/constants';
 
 export function ConsolePanel({ apiKey, t }) {
@@ -66,10 +71,27 @@ export function ConsolePanel({ apiKey, t }) {
                 </div>
             )}
 
-            <textarea value={command} onChange={e => setCommand(e.target.value)}
+            <Editor
+                value={command}
+                onValueChange={setCommand}
                 onKeyDown={e => { if (e.key === 'Enter' && e.ctrlKey) execute(); }}
+                highlight={code => Prism.highlight(code, Prism.languages.matlab, 'matlab')}
                 placeholder={t.commandHint + '\n\nExample:\na = 1 + 1\na + 2'}
-                className="w-full min-h-[130px] p-3 font-mono text-[13px] border border-gray-700 rounded-[7px] resize-y bg-[#1e1e2e] text-[#cdd6f4] box-border outline-none"
+                padding={12}
+                style={{
+                    fontFamily: 'monospace',
+                    fontSize: 13,
+                    minHeight: 130,
+                    backgroundColor: '#1e1e2e',
+                    color: '#cdd6f4',
+                    borderRadius: '7px',
+                    border: '1px solid #374151',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    resize: 'vertical',
+                    overflow: 'auto',
+                }}
+                textareaClassName="outline-none"
             />
 
             <div className="flex gap-2 my-2 flex-wrap">
