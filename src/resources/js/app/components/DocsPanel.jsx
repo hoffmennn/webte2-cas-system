@@ -1,10 +1,12 @@
 import React from 'react';
 import SwaggerUI from 'swagger-ui-react';
 import 'swagger-ui-react/swagger-ui.css';
+import { API_BASE } from '../lib/constants';
 
 export function DocsPanel({ t, lang }) {
-    const specUrl = `/api/openapi.yaml?lang=${lang}`;
-    const pdfUrl  = `/docs.pdf?lang=${lang}`;
+    const base    = (import.meta.env.VITE_BASE_PATH || '/').replace(/\/$/, '');
+    const specUrl = `${API_BASE}/openapi.yaml?lang=${lang}`;
+    const pdfUrl  = `${base}/docs.pdf?lang=${lang}`;
 
     return (
         <div>
