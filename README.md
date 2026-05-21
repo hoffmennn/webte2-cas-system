@@ -42,7 +42,9 @@ cd ..
 App is now at http://localhost:8080.
 
 ## API keys
-
+--------------------------
+API KEY: H4W+BlrHaq9UQj7x
+--------------------------
 Every `/api/*` route requires a valid key in `X-API-Key` (or `Authorization: Bearer …`).
 
 - **The default key lives in `src/.env`** as `CAS_API_KEY=...`. Set this once; the frontend's API-key field accepts the same value.
@@ -84,7 +86,7 @@ docker run --rm -v "$(pwd)/src:/app" -w /app node:20 sh -c "npm install && npm r
 
 | Member                   | Areas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Adam Hoffmann**        | Initial Laravel/React scaffold, OctaveService base, DB schema & migrations, `AnimationStat` model with cooldown logic, `StatsController` + IP geolocation, server-side slowdown, Docker stack, `cas:issue-key` artisan command                                                                                                                                                                                                                                                                                                                                                                                   |
+| **Adam Hoffmann**        | Initial Laravel/React scaffold, REST API interface: OctaveService base, DB schema & migrations, `AnimationStat` model with cooldown logic, `StatsController` + IP geolocation, server-side slowdown, Docker stack, `cas:issue-key` artisan command, synatax highlighting in console, final deploy                                                                                                                                                                                                                                                                                                                                                                                    |
 | **Juraj Durmek** (Yur3x) | Boot-fix sweep (peer-deps, env defaults), frontend modular refactor (`main.jsx` → `app/{App,components,hooks,lib}/`), `useApiKey` hook + `/api/ping` live validation, Tailwind migration + responsive layout, mobile burger nav, bilingual UI (EN/SK lang persistence), CSV export (`LogController`), OpenAPI 3.0 spec (EN + SK) + dynamic PDF generation (dompdf) with `Page X/Y` footer, Swagger UI tab, simulation rewrite to `lsim` + pre-compensator tracking (matches `kyvadlo.txt` / `gulicka.txt`), sign-convention adapter, canvas redesign with fulcrum + gradients, JSON error rendering for `/api/*` |
 
 ## Installed packages & libraries
@@ -140,14 +142,14 @@ The bundled `seed.sql` contains the schema for `api_keys`, `octave_sessions`, `r
 
 ## Submission status
 
-> Per assignment §3: "v prípade neurobenia niektorej z úloh, to treba jasne vyznačiť."
+
 
 | Requirement                                                  | Status                     |
 | ------------------------------------------------------------ | -------------------------- |
-| REQ 1–5 (VCS, bilingual, responsive, REST API, auth)         | ✅ done                    |
-| REQ 6 — syntax highlighting in console textarea              | ❌ NOT done                |
-| REQ 7–12 (animations, logs, CSV, OpenAPI+PDF, stats, Docker) | ✅ done                    |
-| REQ 13 — video                                               | <fill in>                  |
-| §3 — seed.sql                                                | ✅ included in repo root   |
-| §3 — technical documentation                                 | ✅ this README             |
-| §1 — deployed on `nodeXX.webte.fei.stuba.sk`                 | <fill in: URL or NOT done> |
+| REQ 1–5 (VCS, bilingual, responsive, REST API, auth)         |  done                      |
+| REQ 6 — syntax highlighting in console textarea              |  done                      |
+| REQ 7–12 (animations, logs, CSV, OpenAPI+PDF, stats, Docker) |  done                      |
+| REQ 13 — video                                               |  done                      |
+| §3 — seed.sql                                                |  included in repo root     |
+| §3 — technical documentation                                 |  this README               |
+| §1 — deployed on `(https://node41.webte.fei.stuba.sk/cas/)`  | done                       |
